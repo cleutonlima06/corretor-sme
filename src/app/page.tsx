@@ -170,7 +170,13 @@ export default function SMEProDashboard() {
           </TabsContent>
 
           <TabsContent value="students" className="outline-none">
-            <StudentList students={students} onDelete={handleDeleteStudent} title="Relatório de Alunos" showPrint={true} />
+            <StudentList 
+              students={students} 
+              onDelete={handleDeleteStudent} 
+              title="Relatório de Alunos" 
+              showPrint={true} 
+              profileData={profileData}
+            />
           </TabsContent>
 
           <TabsContent value="settings" className="outline-none">
