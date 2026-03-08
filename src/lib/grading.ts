@@ -24,3 +24,21 @@ export function getCategoryColor(category: PerformanceCategory) {
     default: return 'bg-gray-500';
   }
 }
+
+export function getCategoryTextColor(category: PerformanceCategory) {
+  switch (category) {
+    case 'CRÍTICO': return 'text-red-600';
+    case 'INTERMEDIÁRIO': return 'text-orange-600';
+    case 'ADEQUADO': return 'text-green-600';
+    default: return 'text-gray-600';
+  }
+}
+
+export function getCategoryBadgeClasses(category: PerformanceCategory) {
+  switch (category) {
+    case 'CRÍTICO': return 'bg-red-100 text-red-700 border-red-200';
+    case 'INTERMEDIÁRIO': return 'bg-orange-100 text-orange-700 border-orange-200';
+    case 'ADEQUADO': return 'bg-green-100 text-green-700 border-green-200';
+    default: return 'bg-gray-100 text-gray-700 border-gray-200';
+  }
+}

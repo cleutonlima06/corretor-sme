@@ -3,9 +3,10 @@
 import { StudentRecord } from "@/lib/types"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Trash2, Printer, FileDown } from "lucide-react"
-import { getCategoryColor } from "@/lib/grading"
+import { Trash2, Printer } from "lucide-react"
+import { getCategoryColor, getCategoryBadgeClasses, getCategoryTextColor } from "@/lib/grading"
 import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 
 interface StudentListProps {
   students: StudentRecord[];
@@ -32,10 +33,10 @@ export function StudentList({ students, onDelete }: StudentListProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Status</TableHead>
-              <TableHead>Nome</TableHead>
+              <TableHead>Classificação</TableHead>
+              <TableHead>Nome do Aluno</TableHead>
               <TableHead className="text-center">Acertos</TableHead>
-              <TableHead className="text-center">Percentual</TableHead>
+              <TableHead className="text-center">Desempenho (%)</TableHead>
               <TableHead className="text-right no-print">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -51,16 +52,20 @@ export function StudentList({ students, onDelete }: StudentListProps) {
                 <TableRow key={student.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className={`w-3 h-3 rounded-full ${getCategoryColor(student.category)}`} />
-                      <span className="text-xs font-medium hidden md:inline">{student.category}</span>
+                      <span className={`w-3 h-3 rounded-full shrink-0 ${getCategoryColor(student.category)}`} />
+                      <Badge variant="outline" className={cn("font-bold text-[10px] py-0 px-2 uppercase", getCategoryBadgeClasses(student.category))}>
+                        {student.category}
+                      </Badge>
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>
-                  <TableCell className="text-center">{student.score}</TableCell>
+                  <TableCell className={cn("text-center font-bold", getCategoryTextColor(student.category))}>
+                    {student.score}
+                  </TableCell>
                   <TableCell className="text-center">
-                    <Badge variant="secondary" className="bg-primary/10 text-primary">
+                    <div className={cn("inline-flex items-center justify-center font-bold text-lg", getCategoryTextColor(student.category))}>
                       {student.percentage}%
-                    </Badge>
+                    </div>
                   </TableCell>
                   <TableCell className="text-right no-print">
                     <Button 
