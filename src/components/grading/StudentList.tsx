@@ -11,9 +11,10 @@ import { cn } from "@/lib/utils"
 interface StudentListProps {
   students: StudentRecord[];
   onDelete: (id: string) => void;
+  title?: string;
 }
 
-export function StudentList({ students, onDelete }: StudentListProps) {
+export function StudentList({ students, onDelete, title = "Últimos lançamentos" }: StudentListProps) {
   const handlePrint = () => {
     window.print();
   };
@@ -21,7 +22,7 @@ export function StudentList({ students, onDelete }: StudentListProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between no-print">
-        <h2 className="text-xl font-bold">Registros de Alunos</h2>
+        <h2 className="text-xl font-bold">{title}</h2>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={handlePrint} className="flex gap-2">
             <Printer className="h-4 w-4" /> Imprimir Relatório
@@ -58,13 +59,15 @@ export function StudentList({ students, onDelete }: StudentListProps) {
                     </div>
                   </TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>
-                  <TableCell className={cn("text-center font-bold", getCategoryTextColor(student.category))}>
-                    {student.score}
+                  <TableCell className="text-center">
+                    <span className={cn("font-bold", getCategoryTextColor(student.category))}>
+                      {student.score}
+                    </span>
                   </TableCell>
                   <TableCell className="text-center">
-                    <div className={cn("inline-flex items-center justify-center font-bold text-lg", getCategoryTextColor(student.category))}>
+                    <span className={cn("font-bold text-lg", getCategoryTextColor(student.category))}>
                       {student.percentage}%
-                    </div>
+                    </span>
                   </TableCell>
                   <TableCell className="text-right no-print">
                     <Button 

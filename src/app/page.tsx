@@ -151,7 +151,7 @@ export default function SMEProDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 <AIInsightsPanel answerKey={answerKey} students={students} />
-                <StudentList students={students.slice(0, 5)} onDelete={handleDeleteStudent} />
+                <StudentList students={students.slice(0, 5)} onDelete={handleDeleteStudent} title="Últimos lançamentos" />
               </div>
               <div className="space-y-8">
                 <div className="bg-white p-6 rounded-xl border shadow-sm">
@@ -172,7 +172,7 @@ export default function SMEProDashboard() {
           </TabsContent>
 
           <TabsContent value="students" className="outline-none">
-            <StudentList students={students} onDelete={handleDeleteStudent} />
+            <StudentList students={students} onDelete={handleDeleteStudent} title="Relatório de Alunos" />
           </TabsContent>
 
           <TabsContent value="settings" className="outline-none">
