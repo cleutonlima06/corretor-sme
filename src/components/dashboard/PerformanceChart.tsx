@@ -15,15 +15,15 @@ const chartConfig = {
   },
   critico: {
     label: "Crítico",
-    color: "#ef4444",
+    color: "#ef4444", // Vermelho
   },
   intermediario: {
     label: "Intermediário",
-    color: "#eab308", // Yellow-500
+    color: "#eab308", // Amarelo
   },
   adequado: {
     label: "Adequado",
-    color: "#22c55e",
+    color: "#22c55e", // Verde
   },
 } satisfies ChartConfig
 

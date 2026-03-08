@@ -46,7 +46,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-xl border-t-4 border-primary">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto bg-primary w-12 h-12 rounded-xl flex items-center justify-center shadow-md">
-            <GraduationCap className="text-white h-8 w-8" />
+            < GraduationCap className="text-white h-8 w-8" />
           </div>
           <CardTitle className="text-2xl font-bold">Corretor SME Pro</CardTitle>
           <CardDescription>

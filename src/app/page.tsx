@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -91,7 +90,6 @@ export default function SMEProDashboard() {
 
   return (
     <div className="min-h-screen pb-12">
-      {/* Header */}
       <header className="bg-primary text-white py-6 px-4 md:px-8 mb-8 no-print shadow-md">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -150,7 +148,6 @@ export default function SMEProDashboard() {
 
           <TabsContent value="dashboard" className="space-y-8 outline-none">
             <SummaryCards students={students} />
-            
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 <AIInsightsPanel answerKey={answerKey} students={students} />
