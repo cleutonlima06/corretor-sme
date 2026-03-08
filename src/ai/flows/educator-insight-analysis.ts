@@ -1,45 +1,69 @@
 'use server';
 /**
- * @fileOverview An AI agent for analyzing educator insights.
+ * @fileOverview Um agente de IA para analisar insights de educadores.
  *
- * - analyzeEducatorInsights - A function that handles the analysis of student responses and answer keys.
- * - EducatorInsightAnalysisInput - The input type for the analyzeEducatorInsights function.
- * - EducatorInsightAnalysisOutput - The return type for the analyzeEducatorInsights function.
+ * - analyzeEducatorInsights - Uma função que lida com a análise das respostas dos alunos e gabaritos.
+ * - EducatorInsightAnalysisInput - O tipo de entrada para a função analyzeEducatorInsights.
+ * - EducatorInsightAnalysisOutput - O tipo de retorno para a função analyzeEducatorInsights.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
 const EducatorInsightAnalysisInputSchema = z.object({
-  answerKey: z.array(z.string()).describe('An array of correct answers for each question, in order.'),
+  answerKey: z.array(z.string()).describe('Um array com as respostas corretas para cada questão, em ordem.'),
   studentResponses: z.array(z.object({
-    studentName: z.string().describe('The name of the student.'),
-    answers: z.array(z.string()).describe('An array of the student\'s answers to each question, in order.'),
-  })).describe('An array of student records, each containing their name and answers.'),
+    studentName: z.string().describe('O nome do aluno.'),
+    answers: z.array(z.string()).describe('Um array com as respostas do aluno para cada questão, em ordem.'),
+  })).describe('Um array de registros de alunos, cada um contendo nome e respostas.'),
 });
 export type EducatorInsightAnalysisInput = z.infer<typeof EducatorInsightAnalysisInputSchema>;
 
 const EducatorInsightAnalysisOutputSchema = z.object({
   commonErrors: z.array(z.object({
-    questionIndex: z.number().describe('The 0-based index of the question where the common error occurred.'),
-    incorrectAnswer: z.string().describe('The most frequent incorrect answer for this question.'),
-    count: z.number().describe('The number of students who gave this incorrect answer.'),
-    analysis: z.string().optional().describe('A brief analysis of why this specific incorrect answer might be common.'),
-  })).describe('A list of common incorrect answers across students for specific questions.'),
+    questionIndex: z.number().describe('O índice (baseado em 0) da questão onde ocorreu o erro comum.'),
+    incorrectAnswer: z.string().describe('A resposta incorreta mais frequente para esta questão.'),
+    count: z.number().describe('O número de alunos que deram esta resposta incorreta.'),
+    analysis: z.string().optional().describe('Uma breve análise de por que esta resposta incorreta específica pode ser comum.'),
+  })).describe('Uma lista de erros incorretos comuns entre os alunos para questões específicas.'),
   problematicQuestions: z.array(z.object({
-    questionIndex: z.number().describe('The 0-based index of the question that is problematic.'),
-    errorRate: z.number().describe('The percentage of students who answered this question incorrectly (0-100).'),
-    reason: z.string().describe('A brief explanation of why this question is considered problematic (e.g., high error rate, confusing wording).'),
-  })).describe('A list of questions that a significant number of students struggled with.'),
-  suggestedLearningTopics: z.array(z.string()).describe('A list of learning topics or concepts that educators should review with students, based on the identified errors and problematic questions.'),
-}).describe('Analysis of student performance including common errors, problematic questions, and suggested learning topics.');
+    questionIndex: z.number().describe('O índice (baseado em 0) da questão que é problemática.'),
+    errorRate: z.number().describe('A porcentagem de alunos que responderam esta questão incorretamente (0-100).'),
+    reason: z.string().describe('Uma breve explicação de por que esta questão é considerada problemática (ex: alta taxa de erro, enunciado confuso).'),
+  })).describe('Uma lista de questões com as quais um número significativo de alunos teve dificuldade.'),
+  suggestedLearningTopics: z.array(z.string()).describe('Uma lista de tópicos de aprendizagem ou conceitos que os educadores devem revisar com os alunos, com base nos erros identificados.'),
+}).describe('Análise do desempenho dos alunos, incluindo erros comuns, questões problemáticas e sugestões de tópicos de aprendizagem.');
 export type EducatorInsightAnalysisOutput = z.infer<typeof EducatorInsightAnalysisOutputSchema>;
 
 const educatorInsightAnalysisPrompt = ai.definePrompt({
   name: 'educatorInsightAnalysisPrompt',
   input: { schema: EducatorInsightAnalysisInputSchema },
   output: { schema: EducatorInsightAnalysisOutputSchema },
-  prompt: `As an expert educational analyst, your task is to analyze aggregated student responses against an official answer key to identify common errors, pinpoint problematic questions, and suggest targeted learning topics for educators.\n\nHere is the official answer key:\nAnswer Key (Question Index: Correct Answer):\n{{#each answerKey}}\n  Question {{ @index }}: {{{this}}}\n{{/each}}\n\nHere are the student responses:\n{{#each studentResponses}}\n  Student Name: {{{this.studentName}}}\n  Answers:\n  {{#each this.answers}}\n    Question {{ @index }}: {{{this}}}\n  {{/each}}\n{{/each}}\n\nAnalyze the provided data. For each question, compare student answers to the official answer key.\n\nIdentify:\n1.  **Common Errors**: For each question, if a particular incorrect answer is given by multiple students, list it as a common error. Include the question index, the specific incorrect answer, the count of students who gave it, and a brief analysis of the likely misconception.\n2.  **Problematic Questions**: Identify questions where a significant portion (e.g., more than 50%) of students answered incorrectly. For each problematic question, provide its index, the calculated error rate, and a concise reason for why this question is problematic (e.g., concept difficulty, unclear question wording, common misconception).\n3.  **Suggested Learning Topics**: Based on the common errors and problematic questions identified, infer and list specific learning topics or concepts that the students collectively seem to be struggling with. These suggestions should help educators refine their teaching materials and strategies.\n\nProvide your analysis in the specified JSON format.\n`,
+  prompt: `Como um analista educacional especializado, sua tarefa é analisar as respostas agregadas dos alunos em relação a um gabarito oficial para identificar erros comuns, apontar questões problemáticas e sugerir tópicos de aprendizagem direcionados para os educadores.
+
+Aqui está o gabarito oficial:
+Gabarito (Índice da Questão: Resposta Correta):
+{{#each answerKey}}
+  Questão {{ @index }}: {{{this}}}
+{{/each}}
+
+Aqui estão as respostas dos alunos:
+{{#each studentResponses}}
+  Nome do Aluno: {{{this.studentName}}}
+  Respostas:
+  {{#each this.answers}}
+    Questão {{ @index }}: {{{this}}}
+  {{/each}}
+{{/each}}
+
+Analise os dados fornecidos. Para cada questão, compare as respostas dos alunos com o gabarito oficial.
+
+Identifique:
+1. **Erros Comuns**: Para cada questão, se uma resposta incorreta específica for dada por vários alunos, liste-a como um erro comum. Inclua o índice da questão, a resposta incorreta específica, a contagem de alunos que a deram e uma breve análise do provável equívoco ou erro de raciocínio.
+2. **Questões Problemáticas**: Identifique questões onde uma parte significativa (ex: mais de 50%) dos alunos respondeu incorretamente. Para cada questão problemática, forneça seu índice, a taxa de erro calculada e um motivo conciso de por que esta questão é problemática (ex: dificuldade do conceito, enunciado pouco claro, equívoco comum).
+3. **Sugestões de Tópicos de Aprendizagem**: Com base nos erros comuns e questões problemáticas identificadas, infira e liste tópicos ou conceitos de aprendizagem específicos com os quais os alunos parecem estar lutando coletivamente. Essas sugestões devem ajudar os educadores a refinar seus materiais e estratégias de ensino.
+
+Forneça sua análise no formato JSON especificado. Responda inteiramente em Português do Brasil.`,
 });
 
 const educatorInsightAnalysisFlow = ai.defineFlow(
@@ -55,11 +79,11 @@ const educatorInsightAnalysisFlow = ai.defineFlow(
 );
 
 /**
- * Analyzes aggregated student responses against an official answer key to identify common errors
- * and suggest problematic questions or learning topics.
+ * Analisa as respostas agregadas dos alunos em relação a um gabarito oficial para identificar erros comuns
+ * e sugerir questões problemáticas ou tópicos de aprendizagem.
  *
- * @param input - The input containing the answer key and student responses.
- * @returns An analysis including common errors, problematic questions, and suggested learning topics.
+ * @param input - A entrada contendo o gabarito e as respostas dos alunos.
+ * @returns Uma análise incluindo erros comuns, questões problemáticas e tópicos sugeridos.
  */
 export async function analyzeEducatorInsights(input: EducatorInsightAnalysisInput): Promise<EducatorInsightAnalysisOutput> {
   return educatorInsightAnalysisFlow(input);
