@@ -1,6 +1,6 @@
 "use client"
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from "recharts"
 import {
   ChartConfig,
   ChartContainer,
@@ -12,15 +12,38 @@ import { StudentRecord } from "@/lib/types"
 const chartConfig = {
   count: {
     label: "Alunos",
-    color: "hsl(var(--primary))",
+  },
+  critico: {
+    label: "Crítico",
+    color: "#ef4444",
+  },
+  intermediario: {
+    label: "Intermediário",
+    color: "#f97316",
+  },
+  adequado: {
+    label: "Adequado",
+    color: "#22c55e",
   },
 } satisfies ChartConfig
 
 export function PerformanceChart({ students }: { students: StudentRecord[] }) {
   const data = [
-    { category: "Crítico", count: students.filter(s => s.category === 'CRÍTICO').length },
-    { category: "Intermediário", count: students.filter(s => s.category === 'INTERMEDIÁRIO').length },
-    { category: "Adequado", count: students.filter(s => s.category === 'ADEQUADO').length },
+    { 
+      category: "Crítico", 
+      count: students.filter(s => s.category === 'CRÍTICO').length,
+      fill: "var(--color-critico)"
+    },
+    { 
+      category: "Intermediário", 
+      count: students.filter(s => s.category === 'INTERMEDIÁRIO').length,
+      fill: "var(--color-intermediario)"
+    },
+    { 
+      category: "Adequado", 
+      count: students.filter(s => s.category === 'ADEQUADO').length,
+      fill: "var(--color-adequado)"
+    },
   ]
 
   return (
@@ -34,8 +57,12 @@ export function PerformanceChart({ students }: { students: StudentRecord[] }) {
           axisLine={false}
         />
         <YAxis tickLine={false} axisLine={false} />
-        <ChartTooltip content={<ChartTooltipContent />} />
-        <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+        <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
+        <Bar dataKey="count" radius={4}>
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.fill} />
+          ))}
+        </Bar>
       </BarChart>
     </ChartContainer>
   )

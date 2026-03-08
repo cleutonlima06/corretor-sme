@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StudentRecord } from "@/lib/types";
-import { Users, CheckCircle2, AlertCircle, BarChart3 } from "lucide-react";
+import { Users, CheckCircle2, AlertCircle, BarChart3, HelpCircle } from "lucide-react";
 
 export function SummaryCards({ students }: { students: StudentRecord[] }) {
   const totalStudents = students.length;
@@ -15,7 +15,7 @@ export function SummaryCards({ students }: { students: StudentRecord[] }) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       <Card className="shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Total de Alunos</CardTitle>
@@ -43,6 +43,16 @@ export function SummaryCards({ students }: { students: StudentRecord[] }) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{categories.ADEQUADO}</div>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-sm border-l-4 border-l-orange-500">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardTitle className="text-sm font-medium">Intermediário</CardTitle>
+          <HelpCircle className="h-4 w-4 text-orange-500" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{categories.INTERMEDIÁRIO}</div>
         </CardContent>
       </Card>
 

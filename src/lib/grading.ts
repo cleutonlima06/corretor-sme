@@ -19,7 +19,7 @@ export function getPerformanceCategory(percentage: number): PerformanceCategory 
 export function getCategoryColor(category: PerformanceCategory) {
   switch (category) {
     case 'CRÍTICO': return 'bg-red-500';
-    case 'INTERMEDIÁRIO': return 'bg-yellow-500';
+    case 'INTERMEDIÁRIO': return 'bg-orange-500';
     case 'ADEQUADO': return 'bg-green-500';
     default: return 'bg-gray-500';
   }
