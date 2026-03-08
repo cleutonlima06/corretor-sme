@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -23,6 +24,11 @@ export default function SMEProDashboard() {
   const auth = useAuth();
   const db = useFirestore();
   const router = useRouter();
+  const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
   
   const profileRef = useMemoFirebase(() => user ? doc(db, 'users', user.uid, 'professorProfile', user.uid) : null, [user, db]);
   const { data: profileData, isLoading: isProfileLoading } = useDoc(profileRef);
@@ -149,7 +155,12 @@ export default function SMEProDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 <AIInsightsPanel answerKey={answerKey} students={students} />
-                <StudentList students={students.slice(0, 5)} onDelete={handleDeleteStudent} title="Últimos lançamentos" showPrint={false} />
+                <StudentList 
+                  students={students.slice(0, 5)} 
+                  onDelete={handleDeleteStudent} 
+                  title="Últimos lançamentos" 
+                  showPrint={false} 
+                />
               </div>
               <div className="space-y-8">
                 <div className="bg-white p-6 rounded-xl border shadow-sm">
@@ -194,7 +205,7 @@ export default function SMEProDashboard() {
       </main>
       
       <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t py-2 px-8 text-center text-xs text-muted-foreground no-print">
-        Sistema Corretor SME Pro &copy; {new Date().getFullYear()} - Otimizado para gestão escolar moderna.
+        Sistema Corretor SME Pro &copy; {currentYear} - Otimizado para gestão escolar moderna.
       </footer>
     </div>
   );

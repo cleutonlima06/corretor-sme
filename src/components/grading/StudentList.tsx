@@ -1,5 +1,7 @@
+
 "use client"
 
+import { useState, useEffect } from "react"
 import { StudentRecord } from "@/lib/types"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
@@ -17,6 +19,12 @@ interface StudentListProps {
 }
 
 export function StudentList({ students, onDelete, title = "Últimos lançamentos", showPrint = true, profileData }: StudentListProps) {
+  const [currentDate, setCurrentDate] = useState<string>("");
+
+  useEffect(() => {
+    setCurrentDate(new Date().toLocaleDateString('pt-BR'));
+  }, []);
+
   const handlePrint = () => {
     window.print();
   };
@@ -31,16 +39,16 @@ export function StudentList({ students, onDelete, title = "Últimos lançamentos
               <GraduationCap className="h-6 w-6" />
               <h1 className="text-2xl font-bold tracking-tight">Corretor SME Pro</h1>
             </div>
-            <p className="text-muted-foreground text-sm italic">Relatório Oficial de Desempenho - Gerado em {new Date().toLocaleDateString('pt-BR')}</p>
+            <p className="text-muted-foreground text-sm italic">Relatório Oficial de Desempenho - Gerado em {currentDate}</p>
           </div>
           <div className="text-right space-y-1">
-            <h2 className="text-lg font-bold flex items-center justify-end gap-2">
-              <School className="h-4 w-4 text-primary" /> {profileData?.schoolId || 'Escola não informada'}
+            <h2 className="text-lg font-bold flex items-center justify-end gap-2 text-primary">
+              <School className="h-4 w-4" /> {profileData?.schoolId || 'Escola não informada'}
             </h2>
             <div className="text-sm text-muted-foreground flex flex-col items-end">
-              <span className="flex items-center gap-1"><GraduationCap className="h-3 w-3" /> Turma: {profileData?.classroomId || '-'}</span>
-              <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> Ano: {profileData?.academicYear || '-'}</span>
-              <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" /> Disciplina: {profileData?.subjectId || '-'}</span>
+              <span className="flex items-center gap-1">Turma: {profileData?.classroomId || '-'}</span>
+              <span className="flex items-center gap-1">Ano Letivo: {profileData?.academicYear || '-'}</span>
+              <span className="flex items-center gap-1">Disciplina: {profileData?.subjectId || '-'}</span>
             </div>
           </div>
         </div>

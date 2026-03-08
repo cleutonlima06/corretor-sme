@@ -1,3 +1,4 @@
+
 import { PerformanceCategory } from './types';
 
 export function calculateScore(studentAnswers: string[], correctAnswers: string[]) {
@@ -20,7 +21,7 @@ export function getCategoryColor(category: PerformanceCategory) {
   switch (category) {
     case 'CRÍTICO': return 'bg-red-500';
     case 'INTERMEDIÁRIO': return 'bg-yellow-500';
-    case 'ADEQUADO': return 'bg-green-500';
+    case 'ADEQUADO': return 'bg-green-600';
     default: return 'bg-gray-500';
   }
 }
