@@ -46,10 +46,10 @@ export function SummaryCards({ students }: { students: StudentRecord[] }) {
         </CardContent>
       </Card>
 
-      <Card className="shadow-sm border-l-4 border-l-orange-500">
+      <Card className="shadow-sm border-l-4 border-l-yellow-500">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-sm font-medium">Intermediário</CardTitle>
-          <HelpCircle className="h-4 w-4 text-orange-500" />
+          <HelpCircle className="h-4 w-4 text-yellow-500" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{categories.INTERMEDIÁRIO}</div>

@@ -68,14 +68,14 @@ export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], 
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-semibold flex items-center gap-2 text-orange-600">
+              <h3 className="font-semibold flex items-center gap-2 text-yellow-600">
                 <Lightbulb className="h-4 w-4" />
                 Questões Problemáticas
               </h3>
               {insights.problematicQuestions.map((q, i) => (
-                <div key={i} className="p-3 bg-white rounded-lg border border-orange-100 text-sm">
+                <div key={i} className="p-3 bg-white rounded-lg border border-yellow-100 text-sm">
                   <p className="font-bold">Questão {q.questionIndex + 1}</p>
-                  <p className="text-orange-600 font-medium">Taxa de erro: {q.errorRate}%</p>
+                  <p className="text-yellow-600 font-medium">Taxa de erro: {q.errorRate}%</p>
                   <p className="text-muted-foreground mt-1 text-xs">{q.reason}</p>
                 </div>
               ))}

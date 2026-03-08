@@ -19,7 +19,7 @@ const chartConfig = {
   },
   intermediario: {
     label: "Intermediário",
-    color: "#f97316",
+    color: "#eab308", // Yellow-500
   },
   adequado: {
     label: "Adequado",
