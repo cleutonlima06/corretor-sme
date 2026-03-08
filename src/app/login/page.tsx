@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@/firebase';
-import { initiateEmailSignIn, initiateEmailSignUp, initiateAnonymousSignIn } from '@/firebase/non-blocking-login';
+import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,14 +43,14 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <Card className="w-full max-w-md shadow-xl border-t-4 border-t-primary">
+      <Card className="w-full max-w-md shadow-xl border-t-4 border-primary">
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto bg-primary w-12 h-12 rounded-xl flex items-center justify-center shadow-md">
             <GraduationCap className="text-white h-8 w-8" />
           </div>
           <CardTitle className="text-2xl font-bold">Corretor SME Pro</CardTitle>
           <CardDescription>
-            {isSignUp ? 'Crie sua conta de professor' : 'Acesse sua conta para gerenciar notas'}
+            {isSignUp ? 'Crie sua conta de professor para começar' : 'Acesse sua conta para gerenciar notas'}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -78,32 +78,17 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full font-bold py-6 text-lg">
-              {isSignUp ? 'Criar Conta' : 'Entrar'}
+              {isSignUp ? 'Criar Minha Conta' : 'Entrar no Sistema'}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <Button
             variant="ghost"
-            className="w-full text-sm text-muted-foreground"
+            className="w-full text-sm text-muted-foreground hover:text-primary"
             onClick={() => setIsSignUp(!isSignUp)}
           >
-            {isSignUp ? 'Já tem uma conta? Entre aqui' : 'Não tem conta? Cadastre-se'}
-          </Button>
-          <div className="relative w-full">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Ou</span>
-            </div>
-          </div>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => initiateAnonymousSignIn(auth)}
-          >
-            Acessar como Visitante
+            {isSignUp ? 'Já tem uma conta? Entre aqui' : 'Ainda não tem conta? Cadastre-se agora'}
           </Button>
         </CardFooter>
       </Card>
