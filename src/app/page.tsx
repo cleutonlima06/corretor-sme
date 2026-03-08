@@ -18,12 +18,14 @@ import { StudentRecord } from "@/lib/types"
 import { calculateScore, getPerformanceCategory } from "@/lib/grading"
 import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useToast } from "@/hooks/use-toast"
 
 export default function SMEProDashboard() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const db = useFirestore();
   const router = useRouter();
+  const { toast } = useToast();
   const [currentYear, setCurrentYear] = useState<number>(0);
 
   useEffect(() => {
@@ -76,6 +78,20 @@ export default function SMEProDashboard() {
     if (!user) return;
     const docRef = doc(db, 'users', user.uid, 'students', id);
     deleteDocumentNonBlocking(docRef);
+  };
+
+  const handleClearAllStudents = () => {
+    if (!user || students.length === 0) return;
+    
+    students.forEach((student) => {
+      const docRef = doc(db, 'users', user.uid, 'students', student.id);
+      deleteDocumentNonBlocking(docRef);
+    });
+
+    toast({
+      title: "Dados limpos",
+      description: "Todos os registros de alunos foram removidos.",
+    });
   };
 
   const handleLogout = () => {
@@ -184,6 +200,7 @@ export default function SMEProDashboard() {
             <StudentList 
               students={students} 
               onDelete={handleDeleteStudent} 
+              onClearAll={handleClearAllStudents}
               title="Relatório de Alunos" 
               showPrint={true} 
               profileData={profileData}

@@ -5,20 +5,32 @@ import { useState, useEffect } from "react"
 import { StudentRecord } from "@/lib/types"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Trash2, Printer, GraduationCap, School } from "lucide-react"
+import { Trash2, Printer, GraduationCap, School, Eraser } from "lucide-react"
 import { getCategoryBadgeClasses, getCategoryTextColor } from "@/lib/grading"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface StudentListProps {
   students: StudentRecord[];
   onDelete: (id: string) => void;
+  onClearAll?: () => void;
   title?: string;
   showPrint?: boolean;
   profileData?: any;
 }
 
-export function StudentList({ students, onDelete, title = "Últimos lançamentos", showPrint = true, profileData }: StudentListProps) {
+export function StudentList({ students, onDelete, onClearAll, title = "Últimos lançamentos", showPrint = true, profileData }: StudentListProps) {
   const [currentDate, setCurrentDate] = useState<string>("");
 
   useEffect(() => {
@@ -56,13 +68,36 @@ export function StudentList({ students, onDelete, title = "Últimos lançamentos
 
       <div className="flex items-center justify-between no-print">
         <h2 className="text-xl font-bold">{title}</h2>
-        {showPrint && (
-          <div className="flex gap-2">
+        <div className="flex gap-2">
+          {onClearAll && students.length > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="flex gap-2 text-destructive border-destructive/20 hover:bg-destructive/10">
+                  <Eraser className="h-4 w-4" /> Limpar Tudo
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação irá remover permanentemente todos os {students.length} registros de alunos desta turma. Esta ação não pode ser desfeita.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={onClearAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Sim, Limpar Tudo
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          {showPrint && students.length > 0 && (
             <Button variant="outline" size="sm" onClick={handlePrint} className="flex gap-2 border-primary/20 hover:bg-primary/5">
               <Printer className="h-4 w-4" /> Imprimir Relatório
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden print:shadow-none print:border-slate-200">
@@ -103,14 +138,31 @@ export function StudentList({ students, onDelete, title = "Últimos lançamentos
                     </span>
                   </TableCell>
                   <TableCell className="text-right no-print">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
-                      onClick={() => onDelete(student.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Excluir registro?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Deseja realmente remover o registro de <strong>{student.name}</strong>? Esta ação é irreversível.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => onDelete(student.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </TableCell>
                 </TableRow>
               ))
