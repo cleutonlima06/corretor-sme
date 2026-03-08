@@ -12,9 +12,10 @@ interface StudentListProps {
   students: StudentRecord[];
   onDelete: (id: string) => void;
   title?: string;
+  showPrint?: boolean;
 }
 
-export function StudentList({ students, onDelete, title = "Últimos lançamentos" }: StudentListProps) {
+export function StudentList({ students, onDelete, title = "Últimos lançamentos", showPrint = true }: StudentListProps) {
   const handlePrint = () => {
     window.print();
   };
@@ -23,11 +24,13 @@ export function StudentList({ students, onDelete, title = "Últimos lançamentos
     <div className="space-y-4">
       <div className="flex items-center justify-between no-print">
         <h2 className="text-xl font-bold">{title}</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handlePrint} className="flex gap-2">
-            <Printer className="h-4 w-4" /> Imprimir Relatório
-          </Button>
-        </div>
+        {showPrint && (
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handlePrint} className="flex gap-2">
+              <Printer className="h-4 w-4" /> Imprimir Relatório
+            </Button>
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
