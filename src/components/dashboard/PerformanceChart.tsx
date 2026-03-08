@@ -13,36 +13,45 @@ const chartConfig = {
   count: {
     label: "Alunos",
   },
-  critico: {
-    label: "Crítico",
-    color: "#ef4444", // Vermelho
+  abaixo: {
+    label: "Abaixo do Básico",
+    color: "#ef4444",
   },
-  intermediario: {
-    label: "Intermediário",
-    color: "#eab308", // Amarelo
+  basico: {
+    label: "Básico",
+    color: "#eab308",
   },
-  adequado: {
-    label: "Adequado",
-    color: "#22c55e", // Verde
+  proficiente: {
+    label: "Proficiente",
+    color: "#f97316",
+  },
+  avancado: {
+    label: "Avançado",
+    color: "#22c55e",
   },
 } satisfies ChartConfig
 
 export function PerformanceChart({ students }: { students: StudentRecord[] }) {
   const data = [
     { 
-      category: "Crítico", 
-      count: students.filter(s => s.category === 'CRÍTICO').length,
-      fill: "var(--color-critico)"
+      category: "Abaixo Básico", 
+      count: students.filter(s => s.category === 'ABAIXO DO BÁSICO').length,
+      fill: "var(--color-abaixo)"
     },
     { 
-      category: "Intermediário", 
-      count: students.filter(s => s.category === 'INTERMEDIÁRIO').length,
-      fill: "var(--color-intermediario)"
+      category: "Básico", 
+      count: students.filter(s => s.category === 'BÁSICO').length,
+      fill: "var(--color-basico)"
     },
     { 
-      category: "Adequado", 
-      count: students.filter(s => s.category === 'ADEQUADO').length,
-      fill: "var(--color-adequado)"
+      category: "Proficiente", 
+      count: students.filter(s => s.category === 'PROFICIENTE').length,
+      fill: "var(--color-proficiente)"
+    },
+    { 
+      category: "Avançado", 
+      count: students.filter(s => s.category === 'AVANÇADO').length,
+      fill: "var(--color-avancado)"
     },
   ]
 
@@ -55,6 +64,7 @@ export function PerformanceChart({ students }: { students: StudentRecord[] }) {
           tickLine={false}
           tickMargin={10}
           axisLine={false}
+          fontSize={10}
         />
         <YAxis tickLine={false} axisLine={false} />
         <ChartTooltip content={<ChartTooltipContent hideIndicator />} />

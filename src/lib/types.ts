@@ -1,4 +1,4 @@
-export type PerformanceCategory = 'CRÍTICO' | 'INTERMEDIÁRIO' | 'ADEQUADO';
+export type PerformanceCategory = 'ABAIXO DO BÁSICO' | 'BÁSICO' | 'PROFICIENTE' | 'AVANÇADO';
 
 export interface StudentRecord {
   id: string;
@@ -8,6 +8,7 @@ export interface StudentRecord {
   percentage: number;
   category: PerformanceCategory;
   createdAt: number;
+  professorId?: string;
 }
 
 export interface ClassSettings {

@@ -3,20 +3,23 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@/firebase';
-import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { GraduationCap, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user && !isUserLoading) {
@@ -26,14 +29,37 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) return;
+    
+    setLoading(true);
     if (isSignUp) {
-      initiateEmailSignUp(auth, email, password);
+      createUserWithEmailAndPassword(auth, email, password)
+        .catch((error: any) => {
+          setLoading(false);
+          toast({
+            variant: "destructive",
+            title: "Erro no cadastro",
+            description: error.message || "Não foi possível criar sua conta."
+          });
+        });
     } else {
-      initiateEmailSignIn(auth, email, password);
+      signInWithEmailAndPassword(auth, email, password)
+        .catch((error: any) => {
+          setLoading(false);
+          let message = "Ocorreu um erro ao tentar entrar.";
+          if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found') {
+            message = "E-mail ou senha incorretos. Por favor, tente novamente.";
+          }
+          toast({
+            variant: "destructive",
+            title: "Erro de acesso",
+            description: message
+          });
+        });
     }
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || (user && !isUserLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -64,6 +90,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -75,9 +102,11 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
-            <Button type="submit" className="w-full font-bold py-6 text-lg">
+            <Button type="submit" className="w-full font-bold py-6 text-lg" disabled={loading}>
+              {loading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
               {isSignUp ? 'Criar Minha Conta' : 'Entrar no Sistema'}
             </Button>
           </form>
@@ -87,6 +116,7 @@ export default function LoginPage() {
             variant="ghost"
             className="w-full text-sm text-muted-foreground hover:text-primary"
             onClick={() => setIsSignUp(!isSignUp)}
+            disabled={loading}
           >
             {isSignUp ? 'Já tem uma conta? Entre aqui' : 'Ainda não tem conta? Cadastre-se agora'}
           </Button>
