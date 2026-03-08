@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { StudentRecord } from "@/lib/types"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Trash2, Printer, GraduationCap, School, Calendar, BookOpen } from "lucide-react"
+import { Trash2, Printer, GraduationCap, School } from "lucide-react"
 import { getCategoryBadgeClasses, getCategoryTextColor } from "@/lib/grading"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -119,7 +119,6 @@ export function StudentList({ students, onDelete, title = "Últimos lançamentos
         </Table>
       </div>
       
-      {/* Rodapé exclusivo para impressão */}
       <div className="hidden print:block mt-8 pt-4 border-t border-slate-100 text-center text-[10px] text-muted-foreground">
         Documento gerado pelo sistema Corretor SME Pro. A avaliação de desempenho segue as diretrizes pedagógicas vigentes.
       </div>

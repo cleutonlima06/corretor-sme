@@ -24,7 +24,7 @@ export default function SMEProDashboard() {
   const auth = useAuth();
   const db = useFirestore();
   const router = useRouter();
-  const [currentYear, setCurrentYear] = useState<number>(new Date().getFullYear());
+  const [currentYear, setCurrentYear] = useState<number>(0);
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -205,7 +205,7 @@ export default function SMEProDashboard() {
       </main>
       
       <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t py-2 px-8 text-center text-xs text-muted-foreground no-print">
-        Sistema Corretor SME Pro &copy; {currentYear} - Otimizado para gestão escolar moderna.
+        Sistema Corretor SME Pro &copy; {currentYear > 0 ? currentYear : ''} - Otimizado para gestão escolar moderna.
       </footer>
     </div>
   );
