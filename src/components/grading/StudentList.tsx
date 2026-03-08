@@ -1,4 +1,3 @@
-
 "use client"
 
 import { StudentRecord } from "@/lib/types"
@@ -53,7 +52,7 @@ export function StudentList({ students, onDelete }: StudentListProps) {
                 <TableRow key={student.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={cn("font-bold text-[10px] py-0 px-2 uppercase", getCategoryBadgeClasses(student.category))}>
+                      <Badge className={cn("font-bold text-[10px] py-0.5 px-2 uppercase border shadow-none", getCategoryBadgeClasses(student.category))}>
                         {student.category}
                       </Badge>
                     </div>
