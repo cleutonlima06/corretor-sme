@@ -75,12 +75,12 @@ service cloud.firestore {
 
     /**
      * @description Professor profile document. Linked to the user's Auth UID.
-     * @path /users/{professorId}/professorProfile
+     * @path /users/{professorId}/professorProfile/{profileId}
      * @allow (create) Professor creating their own profile with matching ID.
      * @deny (update) Trying to change the 'id' field of the profile.
      * @principle Self-Creation and Ownership.
      */
-    match /users/{professorId}/professorProfile {
+    match /users/{professorId}/professorProfile/{profileId} {
       allow get, list: if isOwner(professorId);
       allow create: if isOwner(professorId) && request.resource.data.id == professorId;
       allow update: if isExistingOwner(professorId) && isUnchanged('id');
