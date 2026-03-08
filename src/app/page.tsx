@@ -1,10 +1,10 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
 import { doc } from "firebase/firestore"
-import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SummaryCards } from "@/components/dashboard/SummaryCards"
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart"
@@ -148,11 +148,11 @@ export default function SMEProDashboard() {
               <TabsTrigger value="students" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
                 <FileText className="h-4 w-4" /> Relatório
               </TabsTrigger>
-              <TabsTrigger value="profile" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
-                <UserCircle className="h-4 w-4" /> Perfil
-              </TabsTrigger>
               <TabsTrigger value="settings" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
                 <Settings className="h-4 w-4" /> Gabarito
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+                <UserCircle className="h-4 w-4" /> Perfil
               </TabsTrigger>
             </TabsList>
           </div>
@@ -187,15 +187,15 @@ export default function SMEProDashboard() {
             <StudentList students={students} onDelete={handleDeleteStudent} />
           </TabsContent>
 
-          <TabsContent value="profile" className="outline-none">
-            <div className="max-w-3xl mx-auto">
-              <ProfessorProfileForm userId={user.uid} initialData={profileData} />
-            </div>
-          </TabsContent>
-
           <TabsContent value="settings" className="outline-none">
             <div className="max-w-4xl mx-auto">
               <AnswerKeyForm currentKey={answerKey} onSave={handleSaveAnswerKey} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="profile" className="outline-none">
+            <div className="max-w-3xl mx-auto">
+              <ProfessorProfileForm userId={user.uid} initialData={profileData} />
             </div>
           </TabsContent>
         </Tabs>

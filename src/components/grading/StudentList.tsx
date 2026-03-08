@@ -1,10 +1,11 @@
+
 "use client"
 
 import { StudentRecord } from "@/lib/types"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Trash2, Printer } from "lucide-react"
-import { getCategoryColor, getCategoryBadgeClasses, getCategoryTextColor } from "@/lib/grading"
+import { getCategoryBadgeClasses, getCategoryTextColor } from "@/lib/grading"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
@@ -52,7 +53,6 @@ export function StudentList({ students, onDelete }: StudentListProps) {
                 <TableRow key={student.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className={`w-3 h-3 rounded-full shrink-0 ${getCategoryColor(student.category)}`} />
                       <Badge variant="outline" className={cn("font-bold text-[10px] py-0 px-2 uppercase", getCategoryBadgeClasses(student.category))}>
                         {student.category}
                       </Badge>
