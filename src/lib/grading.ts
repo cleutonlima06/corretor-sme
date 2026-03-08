@@ -12,7 +12,7 @@ export function calculateScore(studentAnswers: string[], correctAnswers: string[
 
 export function getPerformanceCategory(percentage: number): PerformanceCategory {
   if (percentage < 50) return 'CRÍTICO';
-  if (percentage < 70) return 'INTERMEDIÁRIO'; // Ajustado para 70% como limite para adequado
+  if (percentage < 70) return 'INTERMEDIÁRIO';
   return 'ADEQUADO';
 }
 
@@ -29,7 +29,7 @@ export function getCategoryTextColor(category: PerformanceCategory) {
   switch (category) {
     case 'CRÍTICO': return 'text-red-600';
     case 'INTERMEDIÁRIO': return 'text-yellow-600';
-    case 'ADEQUADO': return 'text-green-600'; // Verde vibrante para adequado
+    case 'ADEQUADO': return 'text-green-600';
     default: return 'text-gray-600';
   }
 }

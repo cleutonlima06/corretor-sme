@@ -24,11 +24,9 @@ export default function SMEProDashboard() {
   const db = useFirestore();
   const router = useRouter();
   
-  // Perfil do Professor e Configurações (inclui Gabarito)
   const profileRef = useMemoFirebase(() => user ? doc(db, 'users', user.uid, 'professorProfile', user.uid) : null, [user, db]);
   const { data: profileData, isLoading: isProfileLoading } = useDoc(profileRef);
 
-  // Lista de Alunos do Firestore
   const studentsQuery = useMemoFirebase(() => user ? query(collection(db, 'users', user.uid, 'students'), orderBy('createdAt', 'desc')) : null, [user, db]);
   const { data: studentsData, isLoading: isStudentsLoading } = useCollection<StudentRecord>(studentsQuery);
 
