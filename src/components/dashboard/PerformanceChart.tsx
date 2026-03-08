@@ -14,7 +14,7 @@ const chartConfig = {
     label: "Alunos",
   },
   abaixo: {
-    label: "Abaixo do Básico",
+    label: "Abaixo do básico",
     color: "#ef4444",
   },
   basico: {
@@ -34,7 +34,7 @@ const chartConfig = {
 export function PerformanceChart({ students }: { students: StudentRecord[] }) {
   const data = [
     { 
-      category: "Abaixo Básico", 
+      category: "Abaixo do Básico", 
       count: students.filter(s => s.category === 'ABAIXO DO BÁSICO').length,
       fill: "var(--color-abaixo)"
     },

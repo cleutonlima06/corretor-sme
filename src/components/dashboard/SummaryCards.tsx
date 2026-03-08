@@ -69,7 +69,7 @@ export function SummaryCards({ students }: { students: StudentRecord[] }) {
 
       <Card className="shadow-sm border-l-4 border-l-red-500">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-red-600">Abaixo Básico</CardTitle>
+          <CardTitle className="text-[10px] font-medium uppercase tracking-wider text-red-600">Abaixo do básico</CardTitle>
           <AlertCircle className="h-4 w-4 text-red-500" />
         </CardHeader>
         <CardContent>
