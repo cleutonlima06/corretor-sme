@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -41,6 +42,7 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
     e.preventDefault();
     const docRef = doc(db, 'users', userId, 'professorProfile', userId);
     
+    // Mantemos o answerKey se ele já existir no documento
     setDocumentNonBlocking(docRef, {
       ...formData,
       id: userId,
@@ -49,7 +51,7 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
 
     toast({
       title: "Perfil atualizado",
-      description: "Suas informações de professor foram salvas.",
+      description: "Suas informações de professor foram salvas com sucesso.",
     });
   };
 
@@ -115,8 +117,8 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
               />
             </div>
           </div>
-          <Button type="submit" className="w-full gap-2">
-            <Save className="h-4 w-4" /> Salvar Configurações de Perfil
+          <Button type="submit" className="w-full gap-2 py-6 text-lg font-bold">
+            <Save className="h-5 w-5" /> Salvar Configurações de Perfil
           </Button>
         </form>
       </CardContent>

@@ -3,8 +3,9 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from "@/firebase"
-import { doc } from "firebase/firestore"
+import { useUser, useAuth, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
+import { doc, collection, query, orderBy } from "firebase/firestore"
+import { setDocumentNonBlocking, addDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SummaryCards } from "@/components/dashboard/SummaryCards"
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart"
@@ -15,7 +16,7 @@ import { AIInsightsPanel } from "@/components/dashboard/AIInsightsPanel"
 import { ProfessorProfileForm } from "@/components/profile/ProfessorProfileForm"
 import { StudentRecord } from "@/lib/types"
 import { calculateScore, getPerformanceCategory } from "@/lib/grading"
-import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle } from "lucide-react"
+import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function SMEProDashboard() {
@@ -24,13 +25,13 @@ export default function SMEProDashboard() {
   const db = useFirestore();
   const router = useRouter();
   
-  const [answerKey, setAnswerKey] = useState<string[]>([]);
-  const [students, setStudents] = useState<StudentRecord[]>([]);
-  const [isHydrated, setIsHydrated] = useState(false);
-
-  // Perfil do Professor vindo do Firestore
+  // Perfil do Professor e Configurações (inclui Gabarito)
   const profileRef = useMemoFirebase(() => user ? doc(db, 'users', user.uid, 'professorProfile', user.uid) : null, [user, db]);
-  const { data: profileData } = useDoc(profileRef);
+  const { data: profileData, isLoading: isProfileLoading } = useDoc(profileRef);
+
+  // Lista de Alunos do Firestore
+  const studentsQuery = useMemoFirebase(() => user ? query(collection(db, 'users', user.uid, 'students'), orderBy('createdAt', 'desc')) : null, [user, db]);
+  const { data: studentsData, isLoading: isStudentsLoading } = useCollection<StudentRecord>(studentsQuery);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -38,65 +39,55 @@ export default function SMEProDashboard() {
     }
   }, [user, isUserLoading, router]);
 
-  useEffect(() => {
-    // Persistence with LocalStorage
-    const savedKey = localStorage.getItem('sme_answer_key');
-    const savedStudents = localStorage.getItem('sme_students');
-    
-    if (savedKey) setAnswerKey(JSON.parse(savedKey));
-    else setAnswerKey(Array(10).fill(""));
-
-    if (savedStudents) setStudents(JSON.parse(savedStudents));
-    
-    setIsHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    if (isHydrated) {
-      localStorage.setItem('sme_answer_key', JSON.stringify(answerKey));
-      localStorage.setItem('sme_students', JSON.stringify(students));
-    }
-  }, [answerKey, students, isHydrated]);
+  const answerKey = profileData?.answerKey || Array(10).fill("");
+  const students = studentsData || [];
 
   const handleSaveAnswerKey = (newKey: string[]) => {
-    setAnswerKey(newKey);
-    const updatedStudents = students.map(student => {
-      const score = calculateScore(student.answers, newKey);
-      const percentage = Math.round((score / newKey.length) * 100);
-      return {
-        ...student,
-        score,
-        percentage,
-        category: getPerformanceCategory(percentage)
-      };
-    });
-    setStudents(updatedStudents);
+    if (!user || !profileRef) return;
+    setDocumentNonBlocking(profileRef, { 
+      answerKey: newKey,
+      updatedAt: new Date().toISOString() 
+    }, { merge: true });
   };
 
   const handleAddStudent = (name: string, answers: string[]) => {
+    if (!user) return;
     const score = calculateScore(answers, answerKey);
     const percentage = Math.round((score / answerKey.length) * 100);
-    const newStudent: StudentRecord = {
-      id: Math.random().toString(36).substr(2, 9),
+    
+    const studentData = {
       name,
       answers,
       score,
       percentage,
       category: getPerformanceCategory(percentage),
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      professorId: user.uid
     };
-    setStudents([newStudent, ...students]);
+    
+    const colRef = collection(db, 'users', user.uid, 'students');
+    addDocumentNonBlocking(colRef, studentData);
   };
 
   const handleDeleteStudent = (id: string) => {
-    setStudents(students.filter(s => s.id !== id));
+    if (!user) return;
+    const docRef = doc(db, 'users', user.uid, 'students', id);
+    deleteDocumentNonBlocking(docRef);
   };
 
   const handleLogout = () => {
     auth.signOut().then(() => router.push('/login'));
   };
 
-  if (isUserLoading || !user || !isHydrated) return null;
+  if (isUserLoading || !user) return null;
+
+  if (isProfileLoading || isStudentsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen pb-12">
@@ -110,24 +101,24 @@ export default function SMEProDashboard() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Corretor SME Pro</h1>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-white/80 text-xs font-light mt-1">
-                {profileData ? (
+                {profileData && profileData.schoolId ? (
                   <>
-                    <span>{profileData.schoolId || 'Escola não definida'}</span>
+                    <span>{profileData.schoolId}</span>
                     <span className="hidden md:inline">|</span>
                     <span>Turma: {profileData.classroomId || '-'}</span>
                     <span className="hidden md:inline">|</span>
-                    <span>{profileData.academicYear || '-'}</span>
+                    <span>Ano: {profileData.academicYear || '-'}</span>
                     <span className="hidden md:inline">|</span>
                     <span>{profileData.subjectId || '-'}</span>
                   </>
                 ) : (
-                  <span>Configure seu perfil para começar</span>
+                  <span>Configure seu perfil na aba Perfil</span>
                 )}
               </div>
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <span className="hidden md:inline text-sm font-medium">{user.email || 'Visitante'}</span>
+            <span className="hidden md:inline text-sm font-medium">{user.email || 'Professor'}</span>
             <Button variant="secondary" size="sm" onClick={handleLogout} className="gap-2">
               <LogOut className="h-4 w-4" /> Sair
             </Button>
@@ -179,7 +170,7 @@ export default function SMEProDashboard() {
 
           <TabsContent value="input" className="outline-none">
             <div className="max-w-3xl mx-auto">
-              <StudentEntryForm questionCount={answerKey.length} onAdd={handleAddStudent} />
+              <StudentEntryForm questionCount={answerKey.length || 10} onAdd={handleAddStudent} />
             </div>
           </TabsContent>
 
