@@ -1,0 +1,174 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * CORE PHILOSOPHY
+     * This ruleset enforces a strict user-ownership model centered around the 'Professor' entity.
+     * Access is primarily governed by the user's authenticated UID matching the path parameters 
+     * of the requested resources.
+     *
+     * DATA STRUCTURE
+     * The database follows a hierarchical structure where all private academic data (classrooms, 
+     * students, exams, and answers) is nested under /users/{professorId}. Global reference 
+     * entities like Schools and Subjects are stored in top-level collections.
+     *
+     * KEY SECURITY DECISIONS
+     * 1. Path-Based Authorization: We rely on the /users/{userId} prefix to grant primary access.
+     * 2. Denormalization for Authorization: Critical relational IDs (professorId, schoolId) are 
+     *    required to be present on documents to ensure rules remain performant and avoid 
+     *    costly get() calls.
+     * 3. Prototyping Flexibility: While we strictly enforce 'who' can access data, we do not 
+     *    validate the specific schema or data types of content fields (e.g., descriptions, names) 
+     *    to allow for rapid UI iteration.
+     * 4. Relational Integrity: On creation and update, we verify that internal ownership fields 
+     *    match the authenticated user to prevent data hijacking or cross-user leakage.
+     */
+
+    // --- Helper Functions ---
+
+    /** @description Checks if the request is from an authenticated user. */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the authenticated user's UID matches the provided userId. */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /** @description Combines ownership check with document existence for write operations. */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /** @description Validates that a field is not being changed during an update. */
+    function isUnchanged(fieldName) {
+      return request.resource.data[fieldName] == resource.data[fieldName];
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Global school information. Read-only for authenticated professors.
+     * @path /schools/{schoolId}
+     * @allow (get) Signed in professor.
+     * @deny (create) Any write attempt.
+     * @principle Public Read with Restricted Writes.
+     */
+    match /schools/{schoolId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Global academic subjects. Read-only for authenticated professors.
+     * @path /subjects/{subjectId}
+     * @allow (list) Signed in professor listing subjects.
+     * @deny (delete) Any modification attempt.
+     * @principle Public Read with Restricted Writes.
+     */
+    match /subjects/{subjectId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Professor profile document. Linked to the user's Auth UID.
+     * @path /users/{professorId}/professorProfile
+     * @allow (create) Professor creating their own profile with matching ID.
+     * @deny (update) Trying to change the 'id' field of the profile.
+     * @principle Self-Creation and Ownership.
+     */
+    match /users/{professorId}/professorProfile {
+      allow get, list: if isOwner(professorId);
+      allow create: if isOwner(professorId) && request.resource.data.id == professorId;
+      allow update: if isExistingOwner(professorId) && isUnchanged('id');
+      allow delete: if isExistingOwner(professorId);
+    }
+
+    /**
+     * @description Classrooms managed by a specific professor.
+     * @path /users/{professorId}/classrooms/{classroomId}
+     * @allow (update) Owner updating a classroom without changing professorId.
+     * @deny (create) Mismatched professorId in the document body.
+     * @principle Ownership and Relational Integrity.
+     */
+    match /users/{professorId}/classrooms/{classroomId} {
+      allow get, list: if isOwner(professorId);
+      allow create: if isOwner(professorId) && request.resource.data.professorId == professorId;
+      allow update: if isExistingOwner(professorId) && isUnchanged('professorId');
+      allow delete: if isExistingOwner(professorId);
+    }
+
+    /**
+     * @description Student records managed by a professor.
+     * @path /users/{professorId}/students/{studentId}
+     * @allow (list) Professor listing their own student records.
+     * @deny (create) Trying to assign a student to a different professorId.
+     * @principle Ownership.
+     */
+    match /users/{professorId}/students/{studentId} {
+      allow get, list: if isOwner(professorId);
+      allow create: if isOwner(professorId) && request.resource.data.professorId == professorId;
+      allow update: if isExistingOwner(professorId) && isUnchanged('professorId');
+      allow delete: if isExistingOwner(professorId);
+    }
+
+    /**
+     * @description Exams created within a specific classroom context.
+     * @path /users/{professorId}/classrooms/{classroomId}/exams/{examId}
+     * @allow (create) Professor creating exam with correct classroom and professor refs.
+     * @deny (update) Changing the classroomId or professorId of an existing exam.
+     * @principle Path-consistent relational integrity.
+     */
+    match /users/{professorId}/classrooms/{classroomId}/exams/{examId} {
+      allow get, list: if isOwner(professorId);
+      allow create: if isOwner(professorId) && request.resource.data.professorId == professorId && request.resource.data.classroomId == classroomId;
+      allow update: if isExistingOwner(professorId) && isUnchanged('professorId') && isUnchanged('classroomId');
+      allow delete: if isExistingOwner(professorId);
+    }
+
+    /**
+     * @description Individual questions belonging to an exam.
+     * @path /users/{professorId}/classrooms/{classroomId}/exams/{examId}/questions/{questionId}
+     * @allow (get) Owner retrieving a specific question.
+     * @deny (create) Parent examId in document doesn't match the path.
+     * @principle Nested Ownership.
+     */
+    match /users/{professorId}/classrooms/{classroomId}/exams/{examId}/questions/{questionId} {
+      allow get, list: if isOwner(professorId);
+      allow create: if isOwner(professorId) && request.resource.data.examId == examId;
+      allow update: if isExistingOwner(professorId) && isUnchanged('examId');
+      allow delete: if isExistingOwner(professorId);
+    }
+
+    /**
+     * @description Student performance attempts recorded by a professor.
+     * @path /users/{professorId}/students/{studentId}/examAttempts/{examAttemptId}
+     * @allow (create) Registering a new exam attempt for a specific student.
+     * @deny (list) Unauthorized user attempting to view student results.
+     * @principle Authorization Independence via Denormalization.
+     */
+    match /users/{professorId}/students/{studentId}/examAttempts/{examAttemptId} {
+      allow get, list: if isOwner(professorId);
+      allow create: if isOwner(professorId) && request.resource.data.professorId == professorId && request.resource.data.studentId == studentId;
+      allow update: if isExistingOwner(professorId) && isUnchanged('professorId') && isUnchanged('studentId');
+      allow delete: if isExistingOwner(professorId);
+    }
+
+    /**
+     * @description Specific student answers within an exam attempt.
+     * @path /users/{professorId}/students/{studentId}/examAttempts/{examAttemptId}/studentAnswers/{studentAnswerId}
+     * @allow (create) Logging a student response.
+     * @deny (update) Modifying answer links to other attempts or students.
+     * @principle Strict path-to-data consistency.
+     */
+    match /users/{professorId}/students/{studentId}/examAttempts/{examAttemptId}/studentAnswers/{studentAnswerId} {
+      allow get, list: if isOwner(professorId);
+      allow create: if isOwner(professorId) && request.resource.data.studentExamAttemptId == examAttemptId;
+      allow update: if isExistingOwner(professorId) && isUnchanged('studentExamAttemptId');
+      allow delete: if isExistingOwner(professorId);
+    }
+  }
+}

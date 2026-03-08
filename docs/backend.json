@@ -1,0 +1,639 @@
+{
+  "entities": {
+    "School": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "School",
+      "type": "object",
+      "description": "Represents a school where professors teach and students learn.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the School entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The official name of the school."
+        },
+        "address": {
+          "type": "string",
+          "description": "The street address of the school."
+        },
+        "city": {
+          "type": "string",
+          "description": "The city where the school is located."
+        },
+        "state": {
+          "type": "string",
+          "description": "The state or province where the school is located."
+        },
+        "zipCode": {
+          "type": "string",
+          "description": "The postal code of the school's location."
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "The contact phone number for the school."
+        },
+        "email": {
+          "type": "string",
+          "description": "The official email address for the school.",
+          "format": "email"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the school record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the school record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "address",
+        "city",
+        "state",
+        "zipCode"
+      ]
+    },
+    "ProfessorProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ProfessorProfile",
+      "type": "object",
+      "description": "Stores profile information for a professor, linked to an external authentication system user ID.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ProfessorProfile entity, typically matching an external user ID."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the professor."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the professor."
+        },
+        "email": {
+          "type": "string",
+          "description": "The contact email address of the professor.",
+          "format": "email"
+        },
+        "schoolId": {
+          "type": "string",
+          "description": "Reference to the School the professor is affiliated with. (Relationship: School 1:N ProfessorProfile)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the professor profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the professor profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName",
+        "schoolId"
+      ]
+    },
+    "Subject": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Subject",
+      "type": "object",
+      "description": "Defines academic subjects or disciplines, such as Mathematics or Portuguese.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Subject entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the subject (e.g., 'Matemática', 'Português')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the subject."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the subject record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the subject record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Classroom": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Classroom",
+      "type": "object",
+      "description": "Represents a specific class group for students in a particular academic year and taught by a professor.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Classroom entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the classroom (e.g., '3º Ano A - Vespertino')."
+        },
+        "academicYear": {
+          "type": "number",
+          "description": "The academic year this classroom pertains to (e.g., 2023)."
+        },
+        "professorId": {
+          "type": "string",
+          "description": "Reference to the ProfessorProfile who teaches this classroom. (Relationship: ProfessorProfile 1:N Classroom)"
+        },
+        "subjectIds": {
+          "type": "array",
+          "description": "References to Subjects taught in this classroom. (Relationship: Classroom N:N Subject)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the classroom record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the classroom record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "academicYear",
+        "professorId"
+      ]
+    },
+    "Student": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Student",
+      "type": "object",
+      "description": "Stores individual student information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Student entity."
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the student."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the student."
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "description": "The student's date of birth.",
+          "format": "date"
+        },
+        "classroomIds": {
+          "type": "array",
+          "description": "References to Classrooms the student is enrolled in. (Relationship: Student N:N Classroom)",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the student record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the student record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firstName",
+        "lastName"
+      ]
+    },
+    "Exam": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Exam",
+      "type": "object",
+      "description": "Represents a specific test, quiz, or assessment administered to students.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Exam entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the exam (e.g., 'Avaliação de Geometria - 1º Bimestre')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the exam."
+        },
+        "classroomId": {
+          "type": "string",
+          "description": "Reference to the Classroom where this exam was administered. (Relationship: Classroom 1:N Exam)"
+        },
+        "subjectId": {
+          "type": "string",
+          "description": "Reference to the Subject this exam covers. (Relationship: Subject 1:N Exam)"
+        },
+        "professorId": {
+          "type": "string",
+          "description": "Reference to the ProfessorProfile who created or administered this exam. (Relationship: ProfessorProfile 1:N Exam)"
+        },
+        "dateAdministered": {
+          "type": "string",
+          "description": "The date and time when the exam was administered.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the exam record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the exam record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "classroomId",
+        "subjectId",
+        "professorId",
+        "dateAdministered"
+      ]
+    },
+    "Question": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Question",
+      "type": "object",
+      "description": "Defines an individual question within an exam, including its correct answer.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Question entity."
+        },
+        "examId": {
+          "type": "string",
+          "description": "Reference to the Exam this question belongs to. (Relationship: Exam 1:N Question)"
+        },
+        "questionNumber": {
+          "type": "number",
+          "description": "The sequential number or order of the question within its exam."
+        },
+        "text": {
+          "type": "string",
+          "description": "The full text of the question, if applicable."
+        },
+        "correctAnswer": {
+          "type": "string",
+          "description": "The official correct answer for this question."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the question record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the question record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "examId",
+        "questionNumber",
+        "correctAnswer"
+      ]
+    },
+    "StudentExamAttempt": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudentExamAttempt",
+      "type": "object",
+      "description": "Records a student's overall attempt and performance on a specific exam.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the StudentExamAttempt entity."
+        },
+        "studentId": {
+          "type": "string",
+          "description": "Reference to the Student who made this attempt. (Relationship: Student 1:N StudentExamAttempt)"
+        },
+        "examId": {
+          "type": "string",
+          "description": "Reference to the Exam this attempt is for. (Relationship: Exam 1:N StudentExamAttempt)"
+        },
+        "score": {
+          "type": "number",
+          "description": "The total score obtained by the student for this exam attempt."
+        },
+        "percentage": {
+          "type": "number",
+          "description": "The percentage score achieved by the student (score / total possible score)."
+        },
+        "performanceStatus": {
+          "type": "string",
+          "description": "Categorical status of student performance (e.g., 'critical', 'intermediate', 'adequate')."
+        },
+        "dateAttempted": {
+          "type": "string",
+          "description": "The date and time when the student attempted the exam.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the student exam attempt record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the student exam attempt record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentId",
+        "examId",
+        "score",
+        "percentage",
+        "performanceStatus",
+        "dateAttempted"
+      ]
+    },
+    "StudentAnswer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "StudentAnswer",
+      "type": "object",
+      "description": "Records an individual student's response to a specific question within an exam attempt.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the StudentAnswer entity."
+        },
+        "studentExamAttemptId": {
+          "type": "string",
+          "description": "Reference to the StudentExamAttempt this answer belongs to. (Relationship: StudentExamAttempt 1:N StudentAnswer)"
+        },
+        "questionId": {
+          "type": "string",
+          "description": "Reference to the Question this answer is for. (Relationship: Question 1:N StudentAnswer)"
+        },
+        "studentResponse": {
+          "type": "string",
+          "description": "The answer provided by the student for this question."
+        },
+        "isCorrect": {
+          "type": "boolean",
+          "description": "Indicates whether the student's response was correct."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the student answer record was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the student answer record was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "studentExamAttemptId",
+        "questionId",
+        "studentResponse",
+        "isCorrect"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/schools/{schoolId}",
+        "definition": {
+          "entityName": "School",
+          "schema": {
+            "$ref": "#/backend/entities/School"
+          },
+          "description": "Stores global school information. Intended for read access by all authenticated professors.",
+          "params": [
+            {
+              "name": "schoolId",
+              "description": "The unique ID of the school."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/subjects/{subjectId}",
+        "definition": {
+          "entityName": "Subject",
+          "schema": {
+            "$ref": "#/backend/entities/Subject"
+          },
+          "description": "Stores global academic subjects/disciplines. Intended for read access by all authenticated professors.",
+          "params": [
+            {
+              "name": "subjectId",
+              "description": "The unique ID of the subject."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{professorId}/professorProfile",
+        "definition": {
+          "entityName": "ProfessorProfile",
+          "schema": {
+            "$ref": "#/backend/entities/ProfessorProfile"
+          },
+          "description": "Stores the profile information for a professor. The document's 'id' field MUST match the '{professorId}' from the path, which also matches 'request.auth.uid'. Includes 'schoolId' as a reference.",
+          "params": [
+            {
+              "name": "professorId",
+              "description": "The unique ID of the professor, matching request.auth.uid."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{professorId}/classrooms/{classroomId}",
+        "definition": {
+          "entityName": "Classroom",
+          "schema": {
+            "$ref": "#/backend/entities/Classroom"
+          },
+          "description": "Contains classrooms managed by a specific professor. The document's 'professorId' field MUST match the '{professorId}' from the path. Includes denormalized 'schoolId' for authorization independence and query efficiency.",
+          "params": [
+            {
+              "name": "professorId",
+              "description": "The unique ID of the professor who owns this classroom."
+            },
+            {
+              "name": "classroomId",
+              "description": "The unique ID of the classroom."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{professorId}/students/{studentId}",
+        "definition": {
+          "entityName": "Student",
+          "schema": {
+            "$ref": "#/backend/entities/Student"
+          },
+          "description": "Stores student records managed by a specific professor. The document's 'professorId' field MUST match the '{professorId}' from the path. Includes denormalized 'schoolId' for authorization independence and query efficiency.",
+          "params": [
+            {
+              "name": "professorId",
+              "description": "The unique ID of the professor who manages this student record."
+            },
+            {
+              "name": "studentId",
+              "description": "The unique ID of the student."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{professorId}/classrooms/{classroomId}/exams/{examId}",
+        "definition": {
+          "entityName": "Exam",
+          "schema": {
+            "$ref": "#/backend/entities/Exam"
+          },
+          "description": "Contains exams created by a professor for a specific classroom. The document's 'professorId' and 'classroomId' fields MUST match the path parameters. Includes denormalized 'schoolId' for authorization independence and efficient querying.",
+          "params": [
+            {
+              "name": "professorId",
+              "description": "The unique ID of the professor who created this exam."
+            },
+            {
+              "name": "classroomId",
+              "description": "The unique ID of the classroom where this exam was administered."
+            },
+            {
+              "name": "examId",
+              "description": "The unique ID of the exam."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{professorId}/classrooms/{classroomId}/exams/{examId}/questions/{questionId}",
+        "definition": {
+          "entityName": "Question",
+          "schema": {
+            "$ref": "#/backend/entities/Question"
+          },
+          "description": "Contains questions belonging to a specific exam. The document's 'professorId', 'classroomId', and 'examId' fields MUST match the path parameters. Includes denormalized 'schoolId' for authorization independence and efficient querying.",
+          "params": [
+            {
+              "name": "professorId",
+              "description": "The unique ID of the professor who owns the parent exam."
+            },
+            {
+              "name": "classroomId",
+              "description": "The unique ID of the classroom associated with the parent exam."
+            },
+            {
+              "name": "examId",
+              "description": "The unique ID of the parent exam."
+            },
+            {
+              "name": "questionId",
+              "description": "The unique ID of the question."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{professorId}/students/{studentId}/examAttempts/{examAttemptId}",
+        "definition": {
+          "entityName": "StudentExamAttempt",
+          "schema": {
+            "$ref": "#/backend/entities/StudentExamAttempt"
+          },
+          "description": "Records a student's overall attempt on an exam, managed by a professor. The document's 'professorId' and 'studentId' fields MUST match the path parameters. CRITICAL: Includes denormalized 'schoolId', 'classroomId', 'examId', and 'subjectId' to ensure Authorization Independence and support QAPs without `get()` calls in security rules.",
+          "params": [
+            {
+              "name": "professorId",
+              "description": "The unique ID of the professor managing this exam attempt."
+            },
+            {
+              "name": "studentId",
+              "description": "The unique ID of the student who made this attempt."
+            },
+            {
+              "name": "examAttemptId",
+              "description": "The unique ID of the student's exam attempt."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{professorId}/students/{studentId}/examAttempts/{examAttemptId}/studentAnswers/{studentAnswerId}",
+        "definition": {
+          "entityName": "StudentAnswer",
+          "schema": {
+            "$ref": "#/backend/entities/StudentAnswer"
+          },
+          "description": "Records an individual student's response to a question within an exam attempt. The document's 'professorId', 'studentId', and 'studentExamAttemptId' fields MUST match the path parameters. CRITICAL: Includes denormalized 'schoolId', 'classroomId', 'examId', 'subjectId', and 'questionId' to ensure Authorization Independence and support QAPs without `get()` calls in security rules.",
+          "params": [
+            {
+              "name": "professorId",
+              "description": "The unique ID of the professor managing this student's answers."
+            },
+            {
+              "name": "studentId",
+              "description": "The unique ID of the student associated with this answer."
+            },
+            {
+              "name": "examAttemptId",
+              "description": "The unique ID of the parent student exam attempt."
+            },
+            {
+              "name": "studentAnswerId",
+              "description": "The unique ID of the student's specific answer."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed following the core principles of Authorization Independence, Structural Segregation, and Access Modeling, with a strong emphasis on Data Clarity and Predictability. All professor-specific data is organized under a top-level `/users/{professorId}` collection, leveraging path-based ownership. This ensures that a professor's data (profile, classrooms, students, exams, attempts, and answers) is inherently secured by checking `request.auth.uid` against the `{professorId}` wildcard in the path.\n\n**Authorization Independence via Denormalization (Strategy A):**\nCrucially, to eliminate `get()` calls in security rules and enable atomic operations, authorization-relevant parent attributes are denormalized into child documents:\n\n*   **Classroom, Student, Exam, Question:** Documents in these subcollections will explicitly include `professorId` (matching the path parameter) and `schoolId` (from the professor's profile). This allows security rules to evaluate ownership and affiliation directly from the document's data without needing to retrieve parent documents.\n*   **StudentExamAttempt:** This document is critical for student performance tracking. It will denormalize `professorId`, `studentId` (from its path), but also `schoolId`, `classroomId`, `examId`, and `subjectId` (from the linked Exam and ProfessorProfile). This comprehensive denormalization supports complex queries and ensures that a rule can confirm a professor's access to an attempt by checking its fields directly.\n*   **StudentAnswer:** Similarly, `StudentAnswer` documents will denormalize `professorId`, `studentId`, `studentExamAttemptId` (from its path), and also `schoolId`, `classroomId`, `examId`, `subjectId`, and `questionId` (from the linked ExamAttempt/Exam/Question). This level of detail makes each `StudentAnswer` document self-contained for authorization purposes.\n\n**QAPs (Rules are not Filters):**\nThe structural segregation and denormalization strategy directly support efficient and secure `list` operations (Query-Able Paths):\n\n*   **Professor-owned data:** For collections like `/users/{professorId}/classrooms`, `/users/{professorId}/students`, `/users/{professorId}/classrooms/{classroomId}/exams`, etc., listing operations inherently retrieve only data owned by the authenticated professor because `request.auth.uid` is part of the path. Security rules will simply confirm `request.auth.uid == professorId` on read access, ensuring that no server-side filtering is required for basic ownership-based lists.\n*   **Cross-context queries:** For more complex queries, such as listing all `StudentExamAttempts` for a specific `classroomId` or `schoolId` (within a professor's domain), the denormalized `classroomId` and `schoolId` fields in the `StudentExamAttempt` documents enable efficient `.where()` queries. The security rules will then verify that `request.auth.uid` matches the `professorId` denormalized in the document itself, preventing unauthorized access while supporting flexible data retrieval without filtering.\n\n**Structural Segregation (Strategy B):**\nGlobal entities like `School` and `Subject` are in their own top-level collections (`/schools`, `/subjects`), indicating a broader accessibility. Professor-specific data is strictly nested under `/users/{professorId}`, clearly separating data with different security postures.\n\nThis design minimizes rule complexity, enhances debuggability, and ensures scalability by avoiding expensive `get()` calls in rules and supporting efficient client-side queries."
+  }
+}
