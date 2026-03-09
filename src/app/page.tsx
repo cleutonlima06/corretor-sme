@@ -43,7 +43,6 @@ export default function SMEProDashboard() {
 
   const students = allStudentsData || [];
   
-  // Filtra estudantes da turma ativa para Dashboard e Relatório
   const currentClassroomStudents = useMemo(() => {
     if (!profileData || !allStudentsData) return [];
     return allStudentsData.filter(s => 
@@ -71,12 +70,13 @@ export default function SMEProDashboard() {
   };
 
   const handleAddStudent = (name: string, answers: string[]) => {
-    if (!user || !profileData) {
+    if (!user || !profileData || !profileData.classroomId) {
       toast({
         variant: "destructive",
-        title: "Perfil incompleto",
-        description: "Configure sua escola e turma no perfil antes de lançar notas."
+        title: "Turma não configurada",
+        description: "Defina os dados da turma no perfil antes de lançar notas."
       });
+      setActiveTab("profile");
       return;
     }
     const score = calculateScore(answers, answerKey);
@@ -90,7 +90,6 @@ export default function SMEProDashboard() {
       category: getPerformanceCategory(percentage),
       createdAt: Date.now(),
       professorId: user.uid,
-      // Salva metadados da turma no aluno para histórico
       schoolId: profileData.schoolId,
       classroomId: profileData.classroomId,
       academicYear: profileData.academicYear?.toString(),
@@ -141,7 +140,6 @@ export default function SMEProDashboard() {
   const handleSelectClassroom = (cls: any) => {
     if (!user || !profileRef) return;
     
-    // Atualiza o perfil ativo para a turma selecionada no histórico
     setDocumentNonBlocking(profileRef, {
       schoolId: cls.schoolId,
       classroomId: cls.classroomId,
@@ -156,6 +154,25 @@ export default function SMEProDashboard() {
     });
     
     setActiveTab("dashboard");
+  };
+
+  const handleFinishClassroom = () => {
+    if (!user || !profileRef) return;
+
+    // Salva a limpeza dos campos de turma para iniciar uma nova
+    setDocumentNonBlocking(profileRef, {
+      classroomId: "",
+      academicYear: "",
+      subjectId: "",
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    toast({
+      title: "Lançamentos Concluídos",
+      description: "Os dados da turma anterior estão salvos no histórico. Defina a nova turma no Perfil.",
+    });
+
+    setActiveTab("profile");
   };
 
   const handleLogout = () => {
@@ -266,13 +283,7 @@ export default function SMEProDashboard() {
                   variant="outline" 
                   size="lg" 
                   className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 gap-2 font-bold py-6 px-8 shadow-sm"
-                  onClick={() => {
-                    toast({
-                      title: "Lançamentos Concluídos",
-                      description: `A turma ${profileData?.classroomId} foi finalizada e está salva para consulta.`,
-                    });
-                    setActiveTab("students");
-                  }}
+                  onClick={handleFinishClassroom}
                 >
                   <CheckCircle2 className="h-5 w-5" />
                   Concluir Lançamentos da Turma
