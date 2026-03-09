@@ -9,6 +9,11 @@ export interface StudentRecord {
   category: PerformanceCategory;
   createdAt: number;
   professorId?: string;
+  // Metadados da turma para histórico
+  schoolId?: string;
+  classroomId?: string;
+  academicYear?: string;
+  subjectId?: string;
 }
 
 export interface ClassSettings {

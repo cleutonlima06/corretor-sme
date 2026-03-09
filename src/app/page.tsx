@@ -1,21 +1,23 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { useUser, useAuth, useFirestore, useDoc, useCollection, useMemoFirebase } from "@/firebase"
 import { doc, collection, query, orderBy } from "firebase/firestore"
-import { setDocumentNonBlocking, addDocumentNonBlocking, deleteDocumentNonBlocking } from "@/firebase/non-blocking-updates"
+import { setDocumentNonBlocking, addDocumentNonBlocking, deleteDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SummaryCards } from "@/components/dashboard/SummaryCards"
 import { PerformanceChart } from "@/components/dashboard/PerformanceChart"
 import { AnswerKeyForm } from "@/components/grading/AnswerKeyForm"
 import { StudentEntryForm } from "@/components/grading/StudentEntryForm"
 import { StudentList } from "@/components/grading/StudentList"
+import { StudentEditDialog } from "@/components/grading/StudentEditDialog"
+import { ClassroomHistory } from "@/components/history/ClassroomHistory"
 import { AIInsightsPanel } from "@/components/dashboard/AIInsightsPanel"
 import { ProfessorProfileForm } from "@/components/profile/ProfessorProfileForm"
 import { StudentRecord } from "@/lib/types"
 import { calculateScore, getPerformanceCategory } from "@/lib/grading"
-import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, CheckCircle2 } from "lucide-react"
+import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, CheckCircle2, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 
@@ -26,6 +28,8 @@ export default function SMEProDashboard() {
   const router = useRouter();
   const { toast } = useToast();
   const [currentYear, setCurrentYear] = useState<number>(0);
+  const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(null);
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -35,7 +39,20 @@ export default function SMEProDashboard() {
   const { data: profileData, isLoading: isProfileLoading } = useDoc(profileRef);
 
   const studentsQuery = useMemoFirebase(() => user ? query(collection(db, 'users', user.uid, 'students'), orderBy('createdAt', 'desc')) : null, [user, db]);
-  const { data: studentsData, isLoading: isStudentsLoading } = useCollection<StudentRecord>(studentsQuery);
+  const { data: allStudentsData, isLoading: isStudentsLoading } = useCollection<StudentRecord>(studentsQuery);
+
+  const students = allStudentsData || [];
+  
+  // Filtra estudantes da turma ativa para Dashboard e Relatório
+  const currentClassroomStudents = useMemo(() => {
+    if (!profileData || !allStudentsData) return [];
+    return allStudentsData.filter(s => 
+      s.schoolId === profileData.schoolId && 
+      s.classroomId === profileData.classroomId && 
+      s.academicYear === profileData.academicYear?.toString() && 
+      s.subjectId === profileData.subjectId
+    );
+  }, [allStudentsData, profileData]);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -44,7 +61,6 @@ export default function SMEProDashboard() {
   }, [user, isUserLoading, router]);
 
   const answerKey = profileData?.answerKey || Array(10).fill("");
-  const students = studentsData || [];
 
   const handleSaveAnswerKey = (newKey: string[]) => {
     if (!user || !profileRef) return;
@@ -55,7 +71,14 @@ export default function SMEProDashboard() {
   };
 
   const handleAddStudent = (name: string, answers: string[]) => {
-    if (!user) return;
+    if (!user || !profileData) {
+      toast({
+        variant: "destructive",
+        title: "Perfil incompleto",
+        description: "Configure sua escola e turma no perfil antes de lançar notas."
+      });
+      return;
+    }
     const score = calculateScore(answers, answerKey);
     const percentage = Math.round((score / answerKey.length) * 100);
     
@@ -66,7 +89,12 @@ export default function SMEProDashboard() {
       percentage,
       category: getPerformanceCategory(percentage),
       createdAt: Date.now(),
-      professorId: user.uid
+      professorId: user.uid,
+      // Salva metadados da turma no aluno para histórico
+      schoolId: profileData.schoolId,
+      classroomId: profileData.classroomId,
+      academicYear: profileData.academicYear?.toString(),
+      subjectId: profileData.subjectId
     };
     
     const colRef = collection(db, 'users', user.uid, 'students');
@@ -79,18 +107,55 @@ export default function SMEProDashboard() {
     deleteDocumentNonBlocking(docRef);
   };
 
+  const handleUpdateStudent = (id: string, name: string, answers: string[], score: number, percentage: number, category: any) => {
+    if (!user) return;
+    const docRef = doc(db, 'users', user.uid, 'students', id);
+    updateDocumentNonBlocking(docRef, {
+      name,
+      answers,
+      score,
+      percentage,
+      category,
+      updatedAt: Date.now()
+    });
+    toast({
+      title: "Registro atualizado",
+      description: `Os dados de ${name} foram salvos.`
+    });
+  };
+
   const handleClearAllStudents = () => {
-    if (!user || students.length === 0) return;
+    if (!user || currentClassroomStudents.length === 0) return;
     
-    students.forEach((student) => {
+    currentClassroomStudents.forEach((student) => {
       const docRef = doc(db, 'users', user.uid, 'students', student.id);
       deleteDocumentNonBlocking(docRef);
     });
 
     toast({
       title: "Dados limpos",
-      description: "Todos os registros de alunos foram removidos.",
+      description: "Todos os registros desta turma foram removidos.",
     });
+  };
+
+  const handleSelectClassroom = (cls: any) => {
+    if (!user || !profileRef) return;
+    
+    // Atualiza o perfil ativo para a turma selecionada no histórico
+    setDocumentNonBlocking(profileRef, {
+      schoolId: cls.schoolId,
+      classroomId: cls.classroomId,
+      academicYear: cls.academicYear,
+      subjectId: cls.subjectId,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    toast({
+      title: "Turma Selecionada",
+      description: `Visualizando dados da turma ${cls.classroomId}.`
+    });
+    
+    setActiveTab("dashboard");
   };
 
   const handleLogout = () => {
@@ -144,7 +209,7 @@ export default function SMEProDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 md:px-8">
-        <Tabs defaultValue="dashboard" className="space-y-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <div className="flex justify-center md:justify-start no-print overflow-x-auto pb-2">
             <TabsList className="bg-white border shadow-sm p-1 rounded-xl">
               <TabsTrigger value="dashboard" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
@@ -156,6 +221,9 @@ export default function SMEProDashboard() {
               <TabsTrigger value="students" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
                 <FileText className="h-4 w-4" /> Relatório
               </TabsTrigger>
+              <TabsTrigger value="history" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+                <Search className="h-4 w-4" /> Consultar Turmas
+              </TabsTrigger>
               <TabsTrigger value="settings" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
                 <Settings className="h-4 w-4" /> Gabarito
               </TabsTrigger>
@@ -166,14 +234,15 @@ export default function SMEProDashboard() {
           </div>
 
           <TabsContent value="dashboard" className="space-y-8 outline-none">
-            <SummaryCards students={students} />
+            <SummaryCards students={currentClassroomStudents} />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
-                <AIInsightsPanel answerKey={answerKey} students={students} />
+                <AIInsightsPanel answerKey={answerKey} students={currentClassroomStudents} />
                 <StudentList 
-                  students={students.slice(0, 5)} 
+                  students={currentClassroomStudents.slice(0, 5)} 
                   onDelete={handleDeleteStudent} 
-                  title="Últimos lançamentos" 
+                  onEdit={(s) => setEditingStudent(s)}
+                  title="Últimos lançamentos da turma" 
                   showPrint={false} 
                 />
               </div>
@@ -183,7 +252,7 @@ export default function SMEProDashboard() {
                     <Sparkles className="h-4 w-4 text-primary" />
                     Distribuição de Desempenho
                   </h3>
-                  <PerformanceChart students={students} />
+                  <PerformanceChart students={currentClassroomStudents} />
                 </div>
               </div>
             </div>
@@ -200,8 +269,9 @@ export default function SMEProDashboard() {
                   onClick={() => {
                     toast({
                       title: "Lançamentos Concluídos",
-                      description: "Os dados desta turma foram finalizados e estão salvos para consulta.",
+                      description: `A turma ${profileData?.classroomId} foi finalizada e está salva para consulta.`,
                     });
+                    setActiveTab("students");
                   }}
                 >
                   <CheckCircle2 className="h-5 w-5" />
@@ -213,13 +283,18 @@ export default function SMEProDashboard() {
 
           <TabsContent value="students" className="outline-none">
             <StudentList 
-              students={students} 
+              students={currentClassroomStudents} 
               onDelete={handleDeleteStudent} 
+              onEdit={(s) => setEditingStudent(s)}
               onClearAll={handleClearAllStudents}
-              title="Relatório de Alunos" 
+              title="Relatório da Turma Ativa" 
               showPrint={true} 
               profileData={profileData}
             />
+          </TabsContent>
+
+          <TabsContent value="history" className="outline-none">
+            <ClassroomHistory students={students} onSelectClassroom={handleSelectClassroom} />
           </TabsContent>
 
           <TabsContent value="settings" className="outline-none">
@@ -234,6 +309,14 @@ export default function SMEProDashboard() {
             </div>
           </TabsContent>
         </Tabs>
+
+        <StudentEditDialog 
+          student={editingStudent} 
+          isOpen={!!editingStudent} 
+          onClose={() => setEditingStudent(null)} 
+          onSave={handleUpdateStudent}
+          answerKey={answerKey}
+        />
       </main>
       
       <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t py-2 px-8 text-center text-xs text-muted-foreground no-print">
