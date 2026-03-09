@@ -40,7 +40,7 @@ export function getCategoryTextColor(category: PerformanceCategory) {
 export function getCategoryBadgeClasses(category: PerformanceCategory) {
   switch (category) {
     case 'ABAIXO DO BÁSICO': return 'bg-red-100 text-red-700 border-red-200';
-    case 'BÁSICO': return 'bg-yellow-100 text-yellow-700 border-yellow-400';
+    case 'BÁSICO': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
     case 'PROFICIENTE': return 'bg-orange-100 text-orange-700 border-orange-200';
     case 'AVANÇADO': return 'bg-green-100 text-green-700 border-green-200';
     default: return 'bg-gray-100 text-gray-700 border-gray-200';

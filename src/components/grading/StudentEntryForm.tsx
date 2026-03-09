@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { UserPlus, Save, CheckCircle2 } from "lucide-react"
+import { UserPlus, Save } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface StudentEntryFormProps {
@@ -29,7 +29,6 @@ export function StudentEntryForm({ questionCount, onAdd }: StudentEntryFormProps
     if (!name.trim()) return;
     onAdd(name, answers);
     
-    // Feedback de confirmação
     toast({
       title: "Respostas cadastradas",
       description: `O registro de ${name} foi salvo com sucesso.`,
@@ -54,7 +53,6 @@ export function StudentEntryForm({ questionCount, onAdd }: StudentEntryFormProps
             <Label htmlFor="studentName">Nome do Aluno</Label>
             <Input 
               id="studentName" 
-              placeholder="Digite o nome completo" 
               value={name}
               onChange={(e) => setName(e.target.value)}
               required

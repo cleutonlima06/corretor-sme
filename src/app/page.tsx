@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -16,7 +15,7 @@ import { AIInsightsPanel } from "@/components/dashboard/AIInsightsPanel"
 import { ProfessorProfileForm } from "@/components/profile/ProfessorProfileForm"
 import { StudentRecord } from "@/lib/types"
 import { calculateScore, getPerformanceCategory } from "@/lib/grading"
-import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2 } from "lucide-react"
+import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 
@@ -191,8 +190,24 @@ export default function SMEProDashboard() {
           </TabsContent>
 
           <TabsContent value="input" className="outline-none">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl mx-auto space-y-8">
               <StudentEntryForm questionCount={answerKey.length || 10} onAdd={handleAddStudent} />
+              <div className="flex justify-center pt-4">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 gap-2 font-bold py-6 px-8 shadow-sm"
+                  onClick={() => {
+                    toast({
+                      title: "Lançamentos Concluídos",
+                      description: "Os dados desta turma foram finalizados e estão salvos para consulta.",
+                    });
+                  }}
+                >
+                  <CheckCircle2 className="h-5 w-5" />
+                  Concluir Lançamentos da Turma
+                </Button>
+              </div>
             </div>
           </TabsContent>
 
