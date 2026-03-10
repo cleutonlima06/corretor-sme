@@ -45,13 +45,15 @@ export default function SMEProDashboard() {
   
   const currentClassroomStudents = useMemo(() => {
     if (!profileData || !allStudentsData) return [];
-    // Filtro rigoroso pela turma ativa
-    return allStudentsData.filter(s => 
-      s.schoolId === profileData.schoolId && 
-      s.classroomId === profileData.classroomId && 
-      s.academicYear === profileData.academicYear?.toString() && 
-      s.subjectId === profileData.subjectId
-    );
+    // Filtro rigoroso pela turma ativa e ordenação alfabética
+    return allStudentsData
+      .filter(s => 
+        s.schoolId === profileData.schoolId && 
+        s.classroomId === profileData.classroomId && 
+        s.academicYear === profileData.academicYear?.toString() && 
+        s.subjectId === profileData.subjectId
+      )
+      .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
   }, [allStudentsData, profileData]);
 
   useEffect(() => {
@@ -260,16 +262,18 @@ export default function SMEProDashboard() {
                   students={currentClassroomStudents.slice(0, 5)} 
                   onDelete={handleDeleteStudent} 
                   onEdit={(s) => setEditingStudent(s)}
-                  title="Últimos lançamentos da turma" 
+                  title="Alunos em destaque" 
                   showPrint={false} 
                 />
               </div>
               <div className="space-y-8">
                 <div className="bg-white p-6 rounded-xl border shadow-sm">
-                  <h3 className="font-bold mb-4 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    Distribuição de Desempenho
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      Distribuição de Desempenho
+                    </h3>
+                  </div>
                   <PerformanceChart students={currentClassroomStudents} />
                 </div>
               </div>

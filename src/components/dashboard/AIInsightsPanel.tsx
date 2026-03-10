@@ -6,13 +6,23 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Sparkles, Loader2, AlertTriangle, Lightbulb, BookOpen } from "lucide-react"
 import { analyzeEducatorInsights, EducatorInsightAnalysisOutput } from "@/ai/flows/educator-insight-analysis"
 import { StudentRecord } from "@/lib/types"
+import { useToast } from "@/hooks/use-toast"
 
 export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], students: StudentRecord[] }) {
   const [loading, setLoading] = useState(false);
   const [insights, setInsights] = useState<EducatorInsightAnalysisOutput | null>(null);
+  const { toast } = useToast();
 
   const handleAnalyze = async () => {
-    if (students.length === 0) return;
+    if (students.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Dados insuficientes",
+        description: "Cadastre pelo menos um aluno para gerar insights."
+      });
+      return;
+    }
+    
     setLoading(true);
     try {
       const result = await analyzeEducatorInsights({
@@ -23,8 +33,17 @@ export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], 
         }))
       });
       setInsights(result);
-    } catch (error) {
+      toast({
+        title: "Análise concluída",
+        description: "A IA identificou padrões de desempenho para esta turma."
+      });
+    } catch (error: any) {
       console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Erro na análise",
+        description: "Não foi possível conectar ao serviço de IA. Verifique sua conexão ou tente novamente mais tarde."
+      });
     } finally {
       setLoading(false);
     }
@@ -58,13 +77,15 @@ export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], 
                 <AlertTriangle className="h-4 w-4" />
                 Erros Comuns
               </h3>
-              {insights.commonErrors.map((err, i) => (
+              {insights.commonErrors.length > 0 ? insights.commonErrors.map((err, i) => (
                 <div key={i} className="p-3 bg-white rounded-lg border border-red-100 text-sm">
                   <p className="font-bold">Questão {err.questionIndex + 1}</p>
                   <p className="text-muted-foreground mt-1">Resposta incorreta "{err.incorrectAnswer}" ({err.count} alunos)</p>
-                  <p className="mt-2 text-xs italic">{err.analysis}</p>
+                  {err.analysis && <p className="mt-2 text-xs italic">{err.analysis}</p>}
                 </div>
-              ))}
+              )) : (
+                <p className="text-xs text-muted-foreground italic">Nenhum erro comum significativo identificado.</p>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -72,13 +93,15 @@ export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], 
                 <Lightbulb className="h-4 w-4" />
                 Questões Problemáticas
               </h3>
-              {insights.problematicQuestions.map((q, i) => (
+              {insights.problematicQuestions.length > 0 ? insights.problematicQuestions.map((q, i) => (
                 <div key={i} className="p-3 bg-white rounded-lg border border-yellow-100 text-sm">
                   <p className="font-bold">Questão {q.questionIndex + 1}</p>
                   <p className="text-yellow-600 font-medium">Taxa de erro: {q.errorRate}%</p>
                   <p className="text-muted-foreground mt-1 text-xs">{q.reason}</p>
                 </div>
-              ))}
+              )) : (
+                <p className="text-xs text-muted-foreground italic">Todas as questões tiveram bom desempenho.</p>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -87,11 +110,13 @@ export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], 
                 Sugestões de Tópicos
               </h3>
               <div className="flex flex-wrap gap-2">
-                {insights.suggestedLearningTopics.map((topic, i) => (
+                {insights.suggestedLearningTopics.length > 0 ? insights.suggestedLearningTopics.map((topic, i) => (
                   <span key={i} className="px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full border border-primary/20">
                     {topic}
                   </span>
-                ))}
+                )) : (
+                  <p className="text-xs text-muted-foreground italic">Continue com o plano de ensino atual.</p>
+                )}
               </div>
             </div>
           </div>

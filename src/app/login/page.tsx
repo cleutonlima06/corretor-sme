@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth, useUser } from '@/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { GraduationCap, Loader2 } from 'lucide-react';
+import { GraduationCap, Loader2, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
@@ -59,6 +59,32 @@ export default function LoginPage() {
     }
   };
 
+  const handleForgotPassword = () => {
+    if (!email) {
+      toast({
+        variant: "destructive",
+        title: "E-mail necessário",
+        description: "Digite seu e-mail para receber o link de recuperação."
+      });
+      return;
+    }
+
+    sendPasswordResetEmail(auth, email)
+      .then(() => {
+        toast({
+          title: "E-mail enviado",
+          description: "Verifique sua caixa de entrada para redefinir sua senha."
+        });
+      })
+      .catch((error: any) => {
+        toast({
+          variant: "destructive",
+          title: "Erro ao enviar e-mail",
+          description: error.message
+        });
+      });
+  };
+
   if (isUserLoading || (user && !isUserLoading)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -94,6 +120,19 @@ export default function LoginPage() {
                 autoComplete="email"
               />
             </div>
+            {!isSignUp && (
+              <div className="flex justify-end">
+                <Button 
+                  type="button" 
+                  variant="link" 
+                  size="sm" 
+                  className="px-0 h-auto text-xs text-muted-foreground hover:text-primary"
+                  onClick={handleForgotPassword}
+                >
+                  <KeyRound className="h-3 w-3 mr-1" /> Esqueci minha senha
+                </Button>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
               <Input

@@ -8,6 +8,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 import { StudentRecord } from "@/lib/types"
+import { Button } from "@/components/ui/button"
+import { FileDown } from "lucide-react"
 
 const chartConfig = {
   count: {
@@ -55,25 +57,41 @@ export function PerformanceChart({ students }: { students: StudentRecord[] }) {
     },
   ]
 
+  const handleSavePDF = () => {
+    window.print();
+  };
+
   return (
-    <ChartContainer config={chartConfig} className="h-[300px] w-full">
-      <BarChart accessibilityLayer data={data}>
-        <CartesianGrid vertical={false} />
-        <XAxis
-          dataKey="category"
-          tickLine={false}
-          tickMargin={10}
-          axisLine={false}
-          fontSize={10}
-        />
-        <YAxis tickLine={false} axisLine={false} />
-        <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
-        <Bar dataKey="count" radius={4}>
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={entry.fill} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ChartContainer>
+    <div className="space-y-4">
+      <div className="flex justify-end no-print">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleSavePDF} 
+          className="gap-2 text-xs border-primary/20 hover:bg-primary/5"
+        >
+          <FileDown className="h-3 w-3" /> Salvar em PDF
+        </Button>
+      </div>
+      <ChartContainer config={chartConfig} className="h-[300px] w-full">
+        <BarChart accessibilityLayer data={data}>
+          <CartesianGrid vertical={false} />
+          <XAxis
+            dataKey="category"
+            tickLine={false}
+            tickMargin={10}
+            axisLine={false}
+            fontSize={10}
+          />
+          <YAxis tickLine={false} axisLine={false} />
+          <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
+          <Bar dataKey="count" radius={4}>
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.fill} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ChartContainer>
+    </div>
   )
 }
