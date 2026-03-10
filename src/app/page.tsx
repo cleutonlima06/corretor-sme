@@ -45,7 +45,7 @@ export default function SMEProDashboard() {
   
   const currentClassroomStudents = useMemo(() => {
     if (!profileData || !allStudentsData) return [];
-    // Filtro rigoroso pela turma ativa e ordenação alfabética
+    // Filtro rigoroso pela turma ativa e ordenação alfabética para relatórios
     return allStudentsData
       .filter(s => 
         s.schoolId === profileData.schoolId && 
@@ -54,6 +54,18 @@ export default function SMEProDashboard() {
         s.subjectId === profileData.subjectId
       )
       .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  }, [allStudentsData, profileData]);
+
+  // Nova lista para os últimos lançamentos (ordem cronológica decrescente)
+  const recentStudents = useMemo(() => {
+    if (!profileData || !allStudentsData) return [];
+    return allStudentsData
+      .filter(s => 
+        s.schoolId === profileData.schoolId && 
+        s.classroomId === profileData.classroomId && 
+        s.academicYear === profileData.academicYear?.toString() && 
+        s.subjectId === profileData.subjectId
+      );
   }, [allStudentsData, profileData]);
 
   useEffect(() => {
@@ -70,6 +82,11 @@ export default function SMEProDashboard() {
       answerKey: newKey,
       updatedAt: new Date().toISOString() 
     }, { merge: true });
+    
+    toast({
+      title: "Gabarito salvo",
+      description: "As respostas oficiais foram atualizadas com sucesso.",
+    });
   };
 
   const handleAddStudent = (name: string, answers: string[]) => {
@@ -162,7 +179,6 @@ export default function SMEProDashboard() {
   const handleFinishClassroom = () => {
     if (!user || !profileRef) return;
 
-    // Conclui e limpa a seleção atual para iniciar uma nova
     setDocumentNonBlocking(profileRef, {
       classroomId: "",
       academicYear: "",
@@ -259,10 +275,10 @@ export default function SMEProDashboard() {
               <div className="lg:col-span-2 space-y-8">
                 <AIInsightsPanel answerKey={answerKey} students={currentClassroomStudents} />
                 <StudentList 
-                  students={currentClassroomStudents.slice(0, 5)} 
+                  students={recentStudents.slice(0, 5)} 
                   onDelete={handleDeleteStudent} 
                   onEdit={(s) => setEditingStudent(s)}
-                  title="Alunos em destaque" 
+                  title="Últimos lançamentos" 
                   showPrint={false} 
                 />
               </div>
