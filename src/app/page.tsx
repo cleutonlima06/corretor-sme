@@ -45,6 +45,7 @@ export default function SMEProDashboard() {
   
   const currentClassroomStudents = useMemo(() => {
     if (!profileData || !allStudentsData) return [];
+    // Filtro rigoroso pela turma ativa
     return allStudentsData.filter(s => 
       s.schoolId === profileData.schoolId && 
       s.classroomId === profileData.classroomId && 
@@ -159,7 +160,7 @@ export default function SMEProDashboard() {
   const handleFinishClassroom = () => {
     if (!user || !profileRef) return;
 
-    // Salva a limpeza dos campos de turma para iniciar uma nova
+    // Conclui e limpa a seleção atual para iniciar uma nova
     setDocumentNonBlocking(profileRef, {
       classroomId: "",
       academicYear: "",
@@ -169,7 +170,7 @@ export default function SMEProDashboard() {
 
     toast({
       title: "Lançamentos Concluídos",
-      description: "Os dados da turma anterior estão salvos no histórico. Defina a nova turma no Perfil.",
+      description: "Os dados foram salvos no histórico. Configure a próxima turma no Perfil.",
     });
 
     setActiveTab("profile");
@@ -200,18 +201,18 @@ export default function SMEProDashboard() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Corretor SME Pro</h1>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-white/80 text-xs font-light mt-1">
-                {profileData && profileData.schoolId ? (
+                {profileData && profileData.schoolId && profileData.classroomId ? (
                   <>
                     <span>{profileData.schoolId}</span>
                     <span className="hidden md:inline">|</span>
-                    <span>Turma: {profileData.classroomId || '-'}</span>
+                    <span>Turma: {profileData.classroomId}</span>
                     <span className="hidden md:inline">|</span>
-                    <span>Ano: {profileData.academicYear || '-'}</span>
+                    <span>Ano: {profileData.academicYear}</span>
                     <span className="hidden md:inline">|</span>
-                    <span>{profileData.subjectId || '-'}</span>
+                    <span>{profileData.subjectId}</span>
                   </>
                 ) : (
-                  <span>Configure seu perfil na aba Perfil</span>
+                  <span>Aguardando configuração de nova turma</span>
                 )}
               </div>
             </div>
@@ -286,7 +287,7 @@ export default function SMEProDashboard() {
                   onClick={handleFinishClassroom}
                 >
                   <CheckCircle2 className="h-5 w-5" />
-                  Concluir Lançamentos da Turma
+                  Finalizar Lançamentos da Turma
                 </Button>
               </div>
             </div>
@@ -331,7 +332,7 @@ export default function SMEProDashboard() {
       </main>
       
       <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t py-2 px-8 text-center text-xs text-muted-foreground no-print">
-        Sistema Corretor SME Pro &copy; {currentYear > 0 ? currentYear : ''} - Otimizado para gestão escolar moderna.
+        Sistema Corretor SME Pro &copy; {currentYear > 0 ? currentYear : ''} - Gestão educacional simplificada.
       </footer>
     </div>
   );
