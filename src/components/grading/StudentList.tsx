@@ -129,7 +129,7 @@ export function StudentList({ students, onDelete, onEdit, onClearAll, title = "Ã
                   </TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>
                   <TableCell className="text-center">
-                    <div className="flex justify-center flex-wrap gap-1 max-w-[240px] mx-auto py-1">
+                    <div className="flex justify-center flex-wrap gap-1.5 max-w-[300px] mx-auto py-1">
                       {student.answers.map((ans, i) => (
                         <span 
                           key={i} 
