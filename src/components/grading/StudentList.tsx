@@ -106,7 +106,7 @@ export function StudentList({ students, onDelete, onEdit, onClearAll, title = "�
             <TableRow>
               <TableHead className="w-[120px]">Classificação</TableHead>
               <TableHead>Nome do Aluno</TableHead>
-              <TableHead className="text-center">Respostas</TableHead>
+              <TableHead className="text-center">Gabarito</TableHead>
               <TableHead className="text-center">Acertos</TableHead>
               <TableHead className="text-center">Desempenho (%)</TableHead>
               <TableHead className="text-right no-print w-[120px]">Ações</TableHead>
@@ -128,8 +128,18 @@ export function StudentList({ students, onDelete, onEdit, onClearAll, title = "�
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>
-                  <TableCell className="text-center font-mono text-[10px] tracking-tight">
-                    {student.answers.join(' ')}
+                  <TableCell className="text-center">
+                    <div className="flex justify-center flex-wrap gap-1 max-w-[240px] mx-auto py-1">
+                      {student.answers.map((ans, i) => (
+                        <span 
+                          key={i} 
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted/50 border border-border text-[9px] font-bold shadow-sm"
+                          title={`Questão ${i + 1}`}
+                        >
+                          {ans || '-'}
+                        </span>
+                      ))}
+                    </div>
                   </TableCell>
                   <TableCell className="text-center">
                     <span className={cn("font-bold", getCategoryTextColor(student.category))}>
