@@ -114,9 +114,8 @@ export function StudentList({
         <Table>
           <TableHeader className="bg-slate-50 print:bg-slate-100">
             <TableRow>
-              <TableHead className="w-[120px]">Classificação</TableHead>
+              <TableHead className="w-[120px]">Desempenho</TableHead>
               <TableHead>Nome do Aluno</TableHead>
-              <TableHead className="text-center">Gabarito</TableHead>
               <TableHead className="text-center">Acertos</TableHead>
               <TableHead className="text-center">Desempenho (%)</TableHead>
               <TableHead className="text-right no-print w-[120px]">Ações</TableHead>
@@ -125,7 +124,7 @@ export function StudentList({
           <TableBody>
             {students.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground italic">
+                <TableCell colSpan={5} className="text-center py-12 text-muted-foreground italic">
                   Nenhum registro encontrado para esta turma.
                 </TableCell>
               </TableRow>
@@ -138,27 +137,6 @@ export function StudentList({
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center flex-wrap gap-1.5 max-w-[400px] mx-auto py-1">
-                      {student.answers.map((ans, i) => {
-                        const isCorrect = ans && answerKey[i] && ans.toUpperCase() === answerKey[i].toUpperCase();
-                        return (
-                          <span 
-                            key={i} 
-                            className={cn(
-                              "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold shadow-sm border transition-colors",
-                              isCorrect 
-                                ? "bg-primary text-primary-foreground border-primary" 
-                                : "bg-transparent text-muted-foreground border-slate-200"
-                            )}
-                            title={`Questão ${i + 1}${isCorrect ? ' (Correta)' : ''}`}
-                          >
-                            {ans || '-'}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </TableCell>
                   <TableCell className="text-center">
                     <span className={cn("font-bold", getCategoryTextColor(student.category))}>
                       {student.score}
