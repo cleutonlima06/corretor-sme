@@ -68,13 +68,38 @@
 }
 
 @media print {
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
   .no-print {
     display: none !important;
   }
+
   .print-only {
     display: block !important;
   }
+
+  .print-break-inside-avoid {
+    break-inside: avoid;
+  }
+
   body {
     background-color: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Garante que o gráfico Recharts seja visível na impressão */
+  .recharts-surface {
+    overflow: visible !important;
   }
 }

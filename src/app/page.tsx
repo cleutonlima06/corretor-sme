@@ -56,7 +56,7 @@ export default function SMEProDashboard() {
       .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
   }, [allStudentsData, profileData]);
 
-  // Nova lista para os últimos lançamentos (ordem cronológica decrescente)
+  // Lista para os últimos lançamentos (5 registros mais recentes)
   const recentStudents = useMemo(() => {
     if (!profileData || !allStudentsData) return [];
     return allStudentsData
@@ -65,7 +65,9 @@ export default function SMEProDashboard() {
         s.classroomId === profileData.classroomId && 
         s.academicYear === profileData.academicYear?.toString() && 
         s.subjectId === profileData.subjectId
-      );
+      )
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+      .slice(0, 5);
   }, [allStudentsData, profileData]);
 
   useEffect(() => {
@@ -275,7 +277,7 @@ export default function SMEProDashboard() {
               <div className="lg:col-span-2 space-y-8">
                 <AIInsightsPanel answerKey={answerKey} students={currentClassroomStudents} />
                 <StudentList 
-                  students={recentStudents.slice(0, 5)} 
+                  students={recentStudents} 
                   onDelete={handleDeleteStudent} 
                   onEdit={(s) => setEditingStudent(s)}
                   title="Últimos lançamentos" 
@@ -283,14 +285,14 @@ export default function SMEProDashboard() {
                 />
               </div>
               <div className="space-y-8">
-                <div className="bg-white p-6 rounded-xl border shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
+                <div className="bg-white p-6 rounded-xl border shadow-sm print-full-width">
+                  <div className="flex items-center justify-between mb-4 no-print">
                     <h3 className="font-bold flex items-center gap-2">
                       <Sparkles className="h-4 w-4 text-primary" />
                       Distribuição de Desempenho
                     </h3>
                   </div>
-                  <PerformanceChart students={currentClassroomStudents} />
+                  <PerformanceChart students={currentClassroomStudents} profileData={profileData} />
                 </div>
               </div>
             </div>
