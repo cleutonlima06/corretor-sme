@@ -98,8 +98,8 @@ export default function LoginPage() {
               {loading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
               Entrar no Sistema
             </Button>
-            <p className="text-center text-xs text-muted-foreground mt-4 font-medium italic">
-              Sistema de Monitoramento de Diagnóstico 2026
+            <p className="text-center text-xs text-muted-foreground mt-4 font-medium">
+              Gestão Poranga 2026
             </p>
           </form>
         </CardContent>
