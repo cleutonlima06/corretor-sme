@@ -149,7 +149,7 @@ export function StudentList({
                               "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold shadow-sm border transition-colors",
                               isCorrect 
                                 ? "bg-primary text-primary-foreground border-primary" 
-                                : "bg-muted/50 text-muted-foreground border-border"
+                                : "bg-transparent text-muted-foreground border-slate-200"
                             )}
                             title={`Questão ${i + 1}${isCorrect ? ' (Correta)' : ''}`}
                           >

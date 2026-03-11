@@ -39,10 +39,10 @@ export function getCategoryTextColor(category: PerformanceCategory) {
 
 export function getCategoryBadgeClasses(category: PerformanceCategory) {
   switch (category) {
-    case 'ABAIXO DO BÁSICO': return 'bg-red-50 text-red-700 border-red-500/30';
-    case 'BÁSICO': return 'bg-yellow-50 text-yellow-700 border-yellow-500/30';
-    case 'PROFICIENTE': return 'bg-orange-50 text-orange-700 border-orange-500/30';
-    case 'AVANÇADO': return 'bg-green-50 text-green-700 border-green-500/30';
-    default: return 'bg-gray-50 text-gray-700 border-gray-300';
+    case 'ABAIXO DO BÁSICO': return 'bg-red-50 text-red-700 border-red-200';
+    case 'BÁSICO': return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+    case 'PROFICIENTE': return 'bg-orange-50 text-orange-700 border-orange-200';
+    case 'AVANÇADO': return 'bg-green-50 text-green-700 border-green-200';
+    default: return 'bg-gray-50 text-gray-700 border-gray-200';
   }
 }
