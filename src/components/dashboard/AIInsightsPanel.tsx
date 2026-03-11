@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from "react"
@@ -33,10 +34,6 @@ export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], 
         }))
       });
       setInsights(result);
-      toast({
-        title: "Análise concluída",
-        description: "A IA identificou padrões de desempenho para esta turma."
-      });
     } catch (error: any) {
       console.error(error);
       toast({
