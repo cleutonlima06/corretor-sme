@@ -28,9 +28,19 @@ interface StudentListProps {
   title?: string;
   showPrint?: boolean;
   profileData?: any;
+  answerKey?: string[];
 }
 
-export function StudentList({ students, onDelete, onEdit, onClearAll, title = "Últimos lançamentos", showPrint = true, profileData }: StudentListProps) {
+export function StudentList({ 
+  students, 
+  onDelete, 
+  onEdit, 
+  onClearAll, 
+  title = "Últimos lançamentos", 
+  showPrint = true, 
+  profileData,
+  answerKey = []
+}: StudentListProps) {
   const [currentDate, setCurrentDate] = useState<string>("");
 
   useEffect(() => {
@@ -129,16 +139,24 @@ export function StudentList({ students, onDelete, onEdit, onClearAll, title = "�
                   </TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>
                   <TableCell className="text-center">
-                    <div className="flex justify-center flex-wrap gap-1.5 max-w-[300px] mx-auto py-1">
-                      {student.answers.map((ans, i) => (
-                        <span 
-                          key={i} 
-                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted/50 border border-border text-[9px] font-bold shadow-sm"
-                          title={`Questão ${i + 1}`}
-                        >
-                          {ans || '-'}
-                        </span>
-                      ))}
+                    <div className="flex justify-center flex-wrap gap-1.5 max-w-[400px] mx-auto py-1">
+                      {student.answers.map((ans, i) => {
+                        const isCorrect = ans && answerKey[i] && ans.toUpperCase() === answerKey[i].toUpperCase();
+                        return (
+                          <span 
+                            key={i} 
+                            className={cn(
+                              "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold shadow-sm border transition-colors",
+                              isCorrect 
+                                ? "bg-primary text-primary-foreground border-primary" 
+                                : "bg-muted/50 text-muted-foreground border-border"
+                            )}
+                            title={`Questão ${i + 1}${isCorrect ? ' (Correta)' : ''}`}
+                          >
+                            {ans || '-'}
+                          </span>
+                        );
+                      })}
                     </div>
                   </TableCell>
                   <TableCell className="text-center">

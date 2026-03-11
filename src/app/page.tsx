@@ -284,6 +284,7 @@ export default function SMEProDashboard() {
                   onEdit={(s) => setEditingStudent(s)}
                   title="Últimos lançamentos" 
                   showPrint={false} 
+                  answerKey={answerKey}
                 />
               </div>
               <div className="space-y-8">
@@ -326,6 +327,7 @@ export default function SMEProDashboard() {
               title="Relatório da Turma Ativa" 
               showPrint={true} 
               profileData={profileData}
+              answerKey={answerKey}
             />
           </TabsContent>
 
