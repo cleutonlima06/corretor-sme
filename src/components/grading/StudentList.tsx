@@ -106,6 +106,7 @@ export function StudentList({ students, onDelete, onEdit, onClearAll, title = "√
             <TableRow>
               <TableHead className="w-[120px]">Classifica√ß√£o</TableHead>
               <TableHead>Nome do Aluno</TableHead>
+              <TableHead className="text-center">Respostas</TableHead>
               <TableHead className="text-center">Acertos</TableHead>
               <TableHead className="text-center">Desempenho (%)</TableHead>
               <TableHead className="text-right no-print w-[120px]">A√ß√µes</TableHead>
@@ -114,7 +115,7 @@ export function StudentList({ students, onDelete, onEdit, onClearAll, title = "√
           <TableBody>
             {students.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-12 text-muted-foreground italic">
+                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground italic">
                   Nenhum registro encontrado para esta turma.
                 </TableCell>
               </TableRow>
@@ -127,6 +128,9 @@ export function StudentList({ students, onDelete, onEdit, onClearAll, title = "√
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>
+                  <TableCell className="text-center font-mono text-[10px] tracking-tight">
+                    {student.answers.join(' ')}
+                  </TableCell>
                   <TableCell className="text-center">
                     <span className={cn("font-bold", getCategoryTextColor(student.category))}>
                       {student.score}
