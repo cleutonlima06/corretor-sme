@@ -15,9 +15,10 @@ import { StudentEditDialog } from "@/components/grading/StudentEditDialog"
 import { ClassroomHistory } from "@/components/history/ClassroomHistory"
 import { AIInsightsPanel } from "@/components/dashboard/AIInsightsPanel"
 import { ProfessorProfileForm } from "@/components/profile/ProfessorProfileForm"
+import { RankingAba } from "@/components/ranking/RankingAba"
 import { StudentRecord } from "@/lib/types"
 import { calculateScore, getPerformanceCategory } from "@/lib/grading"
-import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, CheckCircle2, Search } from "lucide-react"
+import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, CheckCircle2, Search, Trophy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 
@@ -45,7 +46,6 @@ export default function SMEProDashboard() {
   
   const currentClassroomStudents = useMemo(() => {
     if (!profileData || !allStudentsData) return [];
-    // Filtro rigoroso pela turma ativa e ordenação alfabética para relatórios
     return allStudentsData
       .filter(s => 
         s.schoolId === profileData.schoolId && 
@@ -56,7 +56,6 @@ export default function SMEProDashboard() {
       .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
   }, [allStudentsData, profileData]);
 
-  // Lista para os últimos lançamentos (5 registros mais recentes)
   const recentStudents = useMemo(() => {
     if (!profileData || !allStudentsData) return [];
     return allStudentsData
@@ -253,6 +252,9 @@ export default function SMEProDashboard() {
               <TabsTrigger value="dashboard" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
                 <LayoutDashboard className="h-4 w-4" /> Dashboard
               </TabsTrigger>
+              <TabsTrigger value="ranking" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+                <Trophy className="h-4 w-4" /> Classificação
+              </TabsTrigger>
               <TabsTrigger value="input" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
                 <UserPlus className="h-4 w-4" /> Lançar Notas
               </TabsTrigger>
@@ -299,6 +301,10 @@ export default function SMEProDashboard() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="ranking" className="outline-none">
+            <RankingAba students={allStudentsData || []} />
           </TabsContent>
 
           <TabsContent value="input" className="outline-none">
