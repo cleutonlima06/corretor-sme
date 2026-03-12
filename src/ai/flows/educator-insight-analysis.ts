@@ -29,7 +29,7 @@ const EducatorInsightAnalysisOutputSchema = z.object({
   problematicQuestions: z.array(z.object({
     questionIndex: z.number().describe('O índice (baseado em 0) da questão que é problemática.'),
     errorRate: z.number().describe('A porcentagem de alunos que responderam esta questão incorretamente (0-100).'),
-    reason: z.string().describe('Uma breve explicação de por que esta questão é considerada problemática (ex: alta taxa de erro, enunciado confuso).'),
+    reason: z.string().describe('Uma breve explicação de por que esta questão é considerada problemática (ex: alta taxa de erro, dificuldade do conceito).'),
   })).describe('Uma lista de questões com as quais um número significativo de alunos teve dificuldade.'),
   suggestedLearningTopics: z.array(z.string()).describe('Uma lista de tópicos de aprendizagem ou conceitos que os educadores devem revisar com os alunos, com base nos erros identificados.'),
 }).describe('Análise do desempenho dos alunos, incluindo erros comuns, questões problemáticas e sugestões de tópicos de aprendizagem.');
@@ -39,31 +39,27 @@ const educatorInsightAnalysisPrompt = ai.definePrompt({
   name: 'educatorInsightAnalysisPrompt',
   input: { schema: EducatorInsightAnalysisInputSchema },
   output: { schema: EducatorInsightAnalysisOutputSchema },
-  prompt: `Como um analista educacional especializado, sua tarefa é analisar as respostas agregadas dos alunos em relação a um gabarito oficial para identificar erros comuns, apontar questões problemáticas e sugerir tópicos de aprendizagem direcionados para os educadores.
+  prompt: `Você é um Analista Educacional Especialista. Sua tarefa é analisar o desempenho de uma turma em relação a um gabarito oficial.
 
-Aqui está o gabarito oficial:
-Gabarito (Índice da Questão: Resposta Correta):
+GABARITO OFICIAL:
 {{#each answerKey}}
-  Questão {{ @index }}: {{{this}}}
+- Questão {{@index}}: {{{this}}}
 {{/each}}
 
-Aqui estão as respostas dos alunos:
+RESPOSTAS DOS ALUNOS:
 {{#each studentResponses}}
-  Nome do Aluno: {{{this.studentName}}}
-  Respostas:
-  {{#each this.answers}}
-    Questão {{ @index }}: {{{this}}}
-  {{/each}}
+Aluno: {{{this.studentName}}}
+Respostas: {{#each this.answers}}Q{{@index}}:{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
+-------------------
 {{/each}}
 
-Analise os dados fornecidos. Para cada questão, compare as respostas dos alunos com o gabarito oficial.
+INSTRUÇÕES:
+1. Compare cada resposta de cada aluno com o gabarito oficial (índice por índice).
+2. Identifique "Erros Comuns": Quando vários alunos escolhem a mesma alternativa incorreta para uma questão.
+3. Identifique "Questões Problemáticas": Questões com alta taxa de erro (onde muitos alunos erraram).
+4. Sugira tópicos de revisão baseados nos padrões de erros detectados.
 
-Identifique:
-1. **Erros Comuns**: Para cada questão, se uma resposta incorreta específica for dada por vários alunos, liste-a como um erro comum. Inclua o índice da questão, a resposta incorreta específica, a contagem de alunos que a deram e uma breve análise do provável equívoco ou erro de raciocínio.
-2. **Questões Problemáticas**: Identifique questões onde uma parte significativa (ex: mais de 50%) dos alunos respondeu incorretamente. Para cada questão problemática, forneça seu índice, a taxa de erro calculada e um motivo conciso de por que esta questão é problemática (ex: dificuldade do conceito, enunciado pouco claro, equívoco comum).
-3. **Sugestões de Tópicos de Aprendizagem**: Com base nos erros comuns e questões problemáticas identificadas, infira e liste tópicos ou conceitos de aprendizagem específicos com os quais os alunos parecem estar lutando coletivamente. Essas sugestões devem ajudar os educadores a refinar seus materiais e estratégias de ensino.
-
-Forneça sua análise no formato JSON especificado. Responda inteiramente em Português do Brasil.`,
+Responda inteiramente em Português do Brasil no formato JSON solicitado.`,
 });
 
 const educatorInsightAnalysisFlow = ai.defineFlow(
@@ -74,16 +70,15 @@ const educatorInsightAnalysisFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await educatorInsightAnalysisPrompt(input);
-    return output!;
+    if (!output) {
+      throw new Error('O modelo não retornou uma resposta válida.');
+    }
+    return output;
   }
 );
 
 /**
- * Analisa as respostas agregadas dos alunos em relação a um gabarito oficial para identificar erros comuns
- * e sugerir questões problemáticas ou tópicos de aprendizagem.
- *
- * @param input - A entrada contendo o gabarito e as respostas dos alunos.
- * @returns Uma análise incluindo erros comuns, questões problemáticas e tópicos sugeridos.
+ * Analisa as respostas agregadas dos alunos em relação a um gabarito oficial para identificar erros comuns.
  */
 export async function analyzeEducatorInsights(input: EducatorInsightAnalysisInput): Promise<EducatorInsightAnalysisOutput> {
   return educatorInsightAnalysisFlow(input);

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -7,22 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Sparkles, Loader2, AlertTriangle, Lightbulb, BookOpen } from "lucide-react"
 import { analyzeEducatorInsights, EducatorInsightAnalysisOutput } from "@/ai/flows/educator-insight-analysis"
 import { StudentRecord } from "@/lib/types"
-import { useToast } from "@/hooks/use-toast"
 
 export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], students: StudentRecord[] }) {
   const [loading, setLoading] = useState(false);
   const [insights, setInsights] = useState<EducatorInsightAnalysisOutput | null>(null);
-  const { toast } = useToast();
 
   const handleAnalyze = async () => {
-    if (students.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Dados insuficientes",
-        description: "Cadastre pelo menos um aluno para gerar insights."
-      });
-      return;
-    }
+    if (students.length === 0) return;
     
     setLoading(true);
     try {
@@ -35,12 +25,7 @@ export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], 
       });
       setInsights(result);
     } catch (error: any) {
-      console.error(error);
-      toast({
-        variant: "destructive",
-        title: "Erro na análise",
-        description: "Não foi possível conectar ao serviço de IA. Verifique sua conexão ou tente novamente mais tarde."
-      });
+      console.error("Erro na análise de IA:", error);
     } finally {
       setLoading(false);
     }
