@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -39,7 +40,6 @@ export function StudentList({
   title = "Últimos lançamentos", 
   showPrint = true, 
   profileData,
-  answerKey = []
 }: StudentListProps) {
   const [currentDate, setCurrentDate] = useState<string>("");
 
@@ -53,7 +53,6 @@ export function StudentList({
 
   return (
     <div className="space-y-4">
-      {/* Cabeçalho exclusivo para impressão */}
       <div className="hidden print:block mb-8 border-b-2 border-primary/20 pb-6">
         <div className="flex justify-between items-start">
           <div className="space-y-2">
@@ -90,7 +89,7 @@ export function StudentList({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Esta ação irá remover permanentemente todos os {students.length} registros de alunos desta turma. Esta ação não pode ser desfeita.
+                    Esta ação irá remover permanentemente todos os registros desta turma.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -117,7 +116,7 @@ export function StudentList({
               <TableHead className="w-[120px]">Desempenho</TableHead>
               <TableHead>Nome do Aluno</TableHead>
               <TableHead className="text-center">Acertos</TableHead>
-              <TableHead className="text-center">Desempenho (%)</TableHead>
+              <TableHead className="text-center">Percentual (%)</TableHead>
               <TableHead className="text-right no-print w-[120px]">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -125,7 +124,7 @@ export function StudentList({
             {students.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-12 text-muted-foreground italic">
-                  Nenhum registro encontrado para esta turma.
+                  Nenhum registro encontrado.
                 </TableCell>
               </TableRow>
             ) : (
@@ -137,53 +136,22 @@ export function StudentList({
                     </Badge>
                   </TableCell>
                   <TableCell className="font-medium">{student.name}</TableCell>
-                  <TableCell className="text-center">
-                    <span className={cn("font-bold", getCategoryTextColor(student.category))}>
-                      {student.score}
-                    </span>
+                  <TableCell className="text-center font-bold">
+                    {student.score}
                   </TableCell>
-                  <TableCell className="text-center">
-                    <span className={cn("font-bold text-lg", getCategoryTextColor(student.category))}>
-                      {student.percentage}%
-                    </span>
+                  <TableCell className="text-center font-bold text-lg">
+                    {student.percentage}%
                   </TableCell>
                   <TableCell className="text-right no-print">
                     <div className="flex justify-end gap-1">
                       {onEdit && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-muted-foreground hover:text-primary hover:bg-primary/5"
-                          onClick={() => onEdit(student)}
-                        >
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => onEdit(student)}>
                           <Edit2 className="h-4 w-4" />
                         </Button>
                       )}
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Excluir registro?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Deseja realmente remover o registro de <strong>{student.name}</strong>? Esta ação é irreversível.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => onDelete(student.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                              Excluir
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => onDelete(student.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -191,10 +159,6 @@ export function StudentList({
             )}
           </TableBody>
         </Table>
-      </div>
-      
-      <div className="hidden print:block mt-8 pt-4 border-t border-slate-100 text-center text-[10px] text-muted-foreground">
-        Documento gerado pelo sistema Corretor SME Pro. A avaliação de desempenho segue as diretrizes pedagógicas vigentes.
       </div>
     </div>
   );

@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useFirestore } from "@/firebase"
-import { doc, collection } from "firebase/firestore"
+import { doc } from "firebase/firestore"
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -75,7 +75,7 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
 
     toast({
       title: "Configurações Salvas",
-      description: "As informações da turma foram atualizadas e a turma foi registrada no histórico.",
+      description: "As informações da turma foram atualizadas e registradas no histórico.",
     });
   };
 
@@ -113,11 +113,7 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
         const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
         
         if (jsonData.length === 0) {
-          toast({
-            variant: "destructive",
-            title: "Arquivo vazio",
-            description: "O arquivo selecionado não contém dados válidos."
-          });
+          toast({ variant: "destructive", title: "Arquivo vazio", description: "O arquivo selecionado não contém dados válidos." });
           return;
         }
 
@@ -129,28 +125,17 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
           .filter((name): name is string => !!name && name.length > 0);
 
         if (importedNames.length === 0) {
-          toast({
-            variant: "destructive",
-            title: "Coluna não encontrada",
-            description: "Certifique-se de que o arquivo possui uma coluna chamada 'Nome'."
-          });
+          toast({ variant: "destructive", title: "Coluna não encontrada", description: "Certifique-se de que o arquivo possui uma coluna chamada 'Nome'." });
           return;
         }
 
         const combined = Array.from(new Set([...studentNames, ...importedNames])).sort((a, b) => a.localeCompare(b, 'pt-BR'));
         setStudentNames(combined);
         
-        toast({
-          title: "Importação concluída",
-          description: `${importedNames.length} alunos foram adicionados à lista.`,
-        });
+        toast({ title: "Importação concluída", description: `${importedNames.length} alunos foram adicionados.` });
       } catch (error) {
         console.error("Erro na importação:", error);
-        toast({
-          variant: "destructive",
-          title: "Erro no processamento",
-          description: "Não foi possível ler o arquivo. Verifique o formato."
-        });
+        toast({ variant: "destructive", title: "Erro no processamento", description: "Não foi possível ler o arquivo." });
       }
     };
     reader.readAsArrayBuffer(file);
@@ -223,7 +208,7 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
 
             <div className="pt-4">
               <Button type="submit" className="w-full gap-2 py-6 text-lg font-bold shadow-sm">
-                <Save className="h-5 w-5" /> Salvar Configurações e Turma
+                <Save className="h-5 w-5" /> Salvar Configurações
               </Button>
             </div>
           </form>
@@ -276,9 +261,8 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
             </div>
             <div className="max-h-[300px] overflow-y-auto p-2">
               {studentNames.length === 0 ? (
-                <div className="text-center py-12 space-y-2">
-                  <p className="text-sm text-muted-foreground italic">Nenhum aluno cadastrado para esta turma.</p>
-                  <p className="text-[10px] text-muted-foreground uppercase">Dica: Use um arquivo Excel com a coluna 'Nome' para importar.</p>
+                <div className="text-center py-12">
+                  <p className="text-sm text-muted-foreground italic">Nenhum aluno cadastrado.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
