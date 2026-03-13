@@ -1,87 +1,151 @@
+
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { UserPlus, Save } from "lucide-react"
+import { UserPlus, Save, CheckCircle2, AlertCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 interface StudentEntryFormProps {
   questionCount: number;
   onAdd: (name: string, answers: string[]) => void;
+  registeredNames?: string[];
+  existingRecords?: string[]; // IDs/Nomes de alunos que já possuem nota nesta turma
 }
 
-export function StudentEntryForm({ questionCount, onAdd }: StudentEntryFormProps) {
-  const [name, setName] = useState("");
-  const [answers, setAnswers] = useState<string[]>(Array(questionCount).fill(""));
+export function StudentEntryForm({ questionCount, onAdd, registeredNames = [], existingRecords = [] }: StudentEntryFormProps) {
+  const [entries, setEntries] = useState<Record<string, string[]>>({});
+  const [savedStatus, setSavedStatus] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
-  const handleUpdateAnswer = (index: number, value: string) => {
-    const nextAnswers = [...answers];
-    nextAnswers[index] = value.toUpperCase();
-    setAnswers(nextAnswers);
+  useEffect(() => {
+    const initialEntries: Record<string, string[]> = {};
+    registeredNames.forEach(name => {
+      initialEntries[name] = Array(questionCount).fill("");
+    });
+    setEntries(initialEntries);
+  }, [registeredNames, questionCount]);
+
+  const handleUpdateAnswer = (name: string, index: number, value: string) => {
+    setEntries(prev => ({
+      ...prev,
+      [name]: prev[name].map((ans, i) => i === index ? value.toUpperCase() : ans)
+    }));
+    // Se editou, remove o status de salvo para forçar novo clique
+    if (savedStatus[name]) {
+      setSavedStatus(prev => ({ ...prev, [name]: false }));
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
+  const handleSaveStudent = (name: string) => {
+    const answers = entries[name];
+    if (!answers) return;
+
+    // Verifica se preencheu ao menos uma questão
+    if (answers.every(a => !a.trim())) {
+      toast({
+        variant: "destructive",
+        title: "Atenção",
+        description: `Por favor, preencha as respostas de ${name}.`
+      });
+      return;
+    }
+
     onAdd(name, answers);
+    setSavedStatus(prev => ({ ...prev, [name]: true }));
     
     toast({
-      title: "Respostas cadastradas",
-      description: `O registro de ${name} foi salvo com sucesso.`,
-      variant: "default",
+      title: "Sucesso",
+      description: `Lançamento de ${name} registrado.`,
     });
-
-    setName("");
-    setAnswers(Array(questionCount).fill(""));
   };
 
+  if (registeredNames.length === 0) {
+    return (
+      <Card className="border-dashed bg-slate-50">
+        <CardContent className="py-12 text-center space-y-4">
+          <AlertCircle className="h-10 w-10 text-muted-foreground mx-auto" />
+          <div className="space-y-1">
+            <h3 className="font-bold">Nenhum aluno cadastrado</h3>
+            <p className="text-sm text-muted-foreground">Vá até a aba "Perfil" para cadastrar ou importar os nomes dos alunos da sua turma.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="shadow-lg border-primary/10">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <UserPlus className="h-5 w-5 text-primary" />
-          Novo Registro de Aluno
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid gap-2">
-            <Label htmlFor="studentName">Nome do Aluno</Label>
-            <Input 
-              id="studentName" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="py-6 text-lg"
-            />
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between bg-white p-4 rounded-xl border shadow-sm">
+        <div>
+          <h2 className="text-lg font-bold">Lançamento em Massa</h2>
+          <p className="text-xs text-muted-foreground">Preencha as respostas de cada aluno abaixo e clique em salvar.</p>
+        </div>
+        <div className="text-right">
+          <span className="text-xs font-bold text-primary uppercase">Turma com {registeredNames.length} alunos</span>
+        </div>
+      </div>
 
-          <div className="space-y-4">
-            <Label className="text-muted-foreground uppercase text-[10px] font-bold tracking-wider">Folha de Respostas</Label>
-            <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-10 gap-3">
-              {answers.map((ans, idx) => (
-                <div key={idx} className="flex flex-col gap-1">
-                  <span className="text-[10px] font-medium text-muted-foreground text-center">Q{idx + 1}</span>
-                  <Input
-                    className="text-center font-bold uppercase h-12 w-full border-primary/20 focus:border-primary focus:ring-primary answer-box-transition text-lg"
-                    maxLength={1}
-                    value={ans}
-                    onChange={(e) => handleUpdateAnswer(idx, e.target.value)}
-                  />
+      <div className="grid grid-cols-1 gap-6">
+        {registeredNames.map((name) => {
+          const isSaved = savedStatus[name];
+          const hasExisting = existingRecords.includes(name);
+
+          return (
+            <Card key={name} className={cn(
+              "shadow-sm transition-all border-l-4",
+              isSaved || hasExisting ? "border-l-green-500 opacity-80" : "border-l-primary/30"
+            )}>
+              <CardContent className="pt-6 pb-6">
+                <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+                  <div className="min-w-[180px] space-y-1">
+                    <Label className="text-xs font-bold text-muted-foreground uppercase">Aluno</Label>
+                    <p className="font-bold text-slate-800">{name}</p>
+                    {(isSaved || hasExisting) && (
+                      <span className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase">
+                        <CheckCircle2 className="h-3 w-3" /> Registrado
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex-1 w-full space-y-2">
+                    <Label className="text-[10px] font-bold text-muted-foreground uppercase">Respostas (Questões 1 a {questionCount})</Label>
+                    <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+                      {Array(questionCount).fill("").map((_, idx) => (
+                        <div key={idx} className="space-y-1">
+                          <span className="block text-[10px] text-center text-muted-foreground font-medium">Q{idx + 1}</span>
+                          <Input
+                            className="text-center font-bold uppercase h-10 w-full p-0 border-slate-200 focus:border-primary answer-box-transition"
+                            maxLength={1}
+                            value={entries[name]?.[idx] || ""}
+                            onChange={(e) => handleUpdateAnswer(name, idx, e.target.value)}
+                            disabled={isSaved}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 w-full md:w-auto self-end md:self-center">
+                    <Button 
+                      onClick={() => handleSaveStudent(name)}
+                      disabled={isSaved}
+                      variant={isSaved ? "outline" : "default"}
+                      className={cn("w-full md:w-32 gap-2 font-bold", isSaved && "text-green-600 border-green-200")}
+                    >
+                      {isSaved ? "Salvo" : "Salvar"}
+                    </Button>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <Button type="submit" className="w-full bg-primary hover:bg-primary/90 flex gap-2 py-6 text-lg font-bold shadow-md">
-            <Save className="h-5 w-5" /> Registrar Notas
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
   );
 }

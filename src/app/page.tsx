@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -55,6 +56,11 @@ export default function SMEProDashboard() {
       )
       .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
   }, [allStudentsData, profileData]);
+
+  // Lista de nomes de alunos que já possuem registro nesta turma atual
+  const existingStudentNames = useMemo(() => {
+    return currentClassroomStudents.map(s => s.name);
+  }, [currentClassroomStudents]);
 
   const recentStudents = useMemo(() => {
     if (!profileData || !allStudentsData) return [];
@@ -308,8 +314,13 @@ export default function SMEProDashboard() {
           </TabsContent>
 
           <TabsContent value="input" className="outline-none">
-            <div className="max-w-3xl mx-auto space-y-8">
-              <StudentEntryForm questionCount={answerKey.length || 10} onAdd={handleAddStudent} />
+            <div className="max-w-5xl mx-auto space-y-8">
+              <StudentEntryForm 
+                questionCount={answerKey.length || 10} 
+                onAdd={handleAddStudent}
+                registeredNames={profileData?.studentList || []}
+                existingRecords={existingStudentNames}
+              />
               <div className="flex justify-center pt-4">
                 <Button 
                   variant="outline" 
@@ -348,7 +359,7 @@ export default function SMEProDashboard() {
           </TabsContent>
 
           <TabsContent value="profile" className="outline-none">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <ProfessorProfileForm userId={user.uid} initialData={profileData} />
             </div>
           </TabsContent>
