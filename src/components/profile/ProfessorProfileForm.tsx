@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -10,7 +9,8 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { UserCircle, Save, School, GraduationCap, Calendar, BookOpen, UserPlus, Upload, Trash2, Users } from "lucide-react"
+import { UserCircle, Save, School, GraduationCap, Calendar, BookOpen, UserPlus, Upload, Trash2, Users, FileSpreadsheet } from "lucide-react"
+import * as XLSX from "xlsx"
 
 interface ProfessorProfileFormProps {
   userId: string;
@@ -85,28 +85,58 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      const content = event.target?.result as string;
-      // Suporta CSV (vírgula ou ponto e vírgula) ou lista simples por linha
-      const lines = content.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-      
-      const importedNames = lines.map(line => {
-        // Se for CSV, tenta pegar a primeira coluna
-        if (line.includes(';') || line.includes(',')) {
-          return line.split(/[;,]/)[0].trim();
+      try {
+        const data = new Uint8Array(event.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Converte para JSON tratando a primeira linha como cabeçalho
+        const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
+        
+        if (jsonData.length === 0) {
+          toast({
+            variant: "destructive",
+            title: "Arquivo vazio",
+            description: "O arquivo selecionado não contém dados válidos."
+          });
+          return;
         }
-        return line;
-      }).filter(name => name.length > 0 && !name.toLowerCase().includes('nome')); // ignora cabeçalho comum
 
-      const combined = Array.from(new Set([...studentNames, ...importedNames])).sort((a, b) => a.localeCompare(b, 'pt-BR'));
-      setStudentNames(combined);
-      
-      toast({
-        title: "Importação concluída",
-        description: `${importedNames.length} possíveis nomes processados.`,
-      });
+        // Procura pela coluna "Nome" (case insensitive)
+        const importedNames: string[] = jsonData
+          .map(row => {
+            const key = Object.keys(row).find(k => k.toLowerCase() === 'nome');
+            return key ? String(row[key]).trim() : null;
+          })
+          .filter((name): name is string => !!name && name.length > 0);
+
+        if (importedNames.length === 0) {
+          toast({
+            variant: "destructive",
+            title: "Coluna não encontrada",
+            description: "Certifique-se de que o arquivo possui uma coluna chamada 'Nome'."
+          });
+          return;
+        }
+
+        const combined = Array.from(new Set([...studentNames, ...importedNames])).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        setStudentNames(combined);
+        
+        toast({
+          title: "Importação concluída",
+          description: `${importedNames.length} alunos foram adicionados à lista.`,
+        });
+      } catch (error) {
+        console.error("Erro na importação:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro no processamento",
+          description: "Não foi possível ler o arquivo. Verifique o formato."
+        });
+      }
     };
-    reader.readAsText(file);
-    // limpa o input para permitir importar o mesmo arquivo novamente se necessário
+    reader.readAsArrayBuffer(file);
     e.target.value = "";
   };
 
@@ -191,11 +221,11 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
         <CardContent className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 space-y-2">
-              <Label htmlFor="newStudent">Nome do Aluno</Label>
+              <Label htmlFor="newStudent">Cadastrar Aluno Individualmente</Label>
               <div className="flex gap-2">
                 <Input
                   id="newStudent"
-                  placeholder="Nome completo"
+                  placeholder="Digite o nome completo"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
@@ -206,15 +236,15 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
               </div>
             </div>
             <div className="space-y-2 shrink-0">
-              <Label>Importação em Massa</Label>
-              <Button variant="outline" onClick={handleImportClick} className="w-full gap-2 border-dashed">
-                <Upload className="h-4 w-4" /> Importar Excel/CSV
+              <Label>Cadastro em Massa</Label>
+              <Button variant="outline" onClick={handleImportClick} className="w-full gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors">
+                <FileSpreadsheet className="h-4 w-4 text-primary" /> Importar Excel
               </Button>
               <input 
                 type="file" 
                 ref={fileInputRef} 
                 className="hidden" 
-                accept=".csv,.txt,.xlsx,.xls" 
+                accept=".xlsx,.xls,.csv" 
                 onChange={handleFileImport}
               />
             </div>
@@ -224,19 +254,22 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
             <div className="p-3 border-b bg-white rounded-t-lg flex justify-between items-center">
               <span className="text-xs font-bold text-muted-foreground uppercase">Alunos Cadastrados ({studentNames.length})</span>
               {studentNames.length > 0 && (
-                <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={() => handleSaveProfile()}>
-                  Salvar Lista Agora
+                <Button variant="link" size="sm" className="h-auto p-0 text-xs font-bold text-primary" onClick={() => handleSaveProfile()}>
+                  Confirmar e Salvar Lista
                 </Button>
               )}
             </div>
             <div className="max-h-[300px] overflow-y-auto p-2">
               {studentNames.length === 0 ? (
-                <p className="text-center py-8 text-sm text-muted-foreground italic">Nenhum aluno cadastrado ainda.</p>
+                <div className="text-center py-12 space-y-2">
+                  <p className="text-sm text-muted-foreground italic">Nenhum aluno cadastrado para esta turma.</p>
+                  <p className="text-[10px] text-muted-foreground uppercase">Dica: Use um arquivo Excel com a coluna 'Nome' para importar.</p>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {studentNames.map((name, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-white border rounded-md group">
-                      <span className="text-sm truncate">{name}</span>
+                    <div key={index} className="flex items-center justify-between p-2 bg-white border rounded-md group hover:border-primary/30 transition-colors">
+                      <span className="text-sm truncate font-medium">{name}</span>
                       <Button 
                         variant="ghost" 
                         size="icon" 
