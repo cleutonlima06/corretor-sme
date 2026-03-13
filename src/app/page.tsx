@@ -31,6 +31,7 @@ export default function SMEProDashboard() {
   const { toast } = useToast();
   const [currentYear, setCurrentYear] = useState<number>(0);
   const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(null);
+  const [editingAnswerKey, setEditingAnswerKey] = useState<string[] | null>(null);
   const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
@@ -46,8 +47,6 @@ export default function SMEProDashboard() {
   const classroomsQuery = useMemoFirebase(() => user ? query(collection(db, 'users', user.uid, 'classrooms'), orderBy('updatedAt', 'desc')) : null, [user, db]);
   const { data: classroomsData, isLoading: isClassroomsLoading } = useCollection(classroomsQuery);
 
-  const students = allStudentsData || [];
-  
   const currentClassroomStudents = useMemo(() => {
     if (!profileData || !allStudentsData) return [];
     return allStudentsData
@@ -184,8 +183,12 @@ export default function SMEProDashboard() {
       description: `A lista de ${cls.studentList?.length || 0} alunos foi carregada.`
     });
     
-    // Switch directly to the Grading tab as requested
     setActiveTab("input");
+  };
+
+  const handleOpenEdit = (student: StudentRecord, customKey?: string[]) => {
+    setEditingStudent(student);
+    setEditingAnswerKey(customKey || answerKey);
   };
 
   const handleLogout = () => {
@@ -276,7 +279,6 @@ export default function SMEProDashboard() {
                 <StudentList 
                   students={recentStudents} 
                   onDelete={handleDeleteStudent} 
-                  onEdit={(s) => setEditingStudent(s)}
                   title="Últimos lançamentos" 
                   showPrint={false} 
                   answerKey={answerKey}
@@ -315,7 +317,6 @@ export default function SMEProDashboard() {
             <StudentList 
               students={currentClassroomStudents} 
               onDelete={handleDeleteStudent} 
-              onEdit={(s) => setEditingStudent(s)}
               onClearAll={handleClearAllStudents}
               title="Relatório da Turma Ativa" 
               showPrint={true} 
@@ -325,7 +326,13 @@ export default function SMEProDashboard() {
           </TabsContent>
 
           <TabsContent value="history" className="outline-none">
-            <ClassroomHistory classrooms={classroomsData || []} onSelectClassroom={handleSelectClassroom} />
+            <ClassroomHistory 
+              classrooms={classroomsData || []} 
+              allStudents={allStudentsData || []}
+              onDeleteStudent={handleDeleteStudent}
+              onEditStudent={handleOpenEdit}
+              onSelectClassroom={handleSelectClassroom} 
+            />
           </TabsContent>
 
           <TabsContent value="settings" className="outline-none">
@@ -344,9 +351,9 @@ export default function SMEProDashboard() {
         <StudentEditDialog 
           student={editingStudent} 
           isOpen={!!editingStudent} 
-          onClose={() => setEditingStudent(null)} 
+          onClose={() => { setEditingStudent(null); setEditingAnswerKey(null); }} 
           onSave={handleUpdateStudent}
-          answerKey={answerKey}
+          answerKey={editingAnswerKey || answerKey}
         />
       </main>
       

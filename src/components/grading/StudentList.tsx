@@ -6,7 +6,7 @@ import { StudentRecord } from "@/lib/types"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Trash2, Printer, GraduationCap, School, Eraser, Edit2 } from "lucide-react"
-import { getCategoryBadgeClasses, getCategoryTextColor } from "@/lib/grading"
+import { getCategoryBadgeClasses } from "@/lib/grading"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import {
@@ -24,7 +24,7 @@ import {
 interface StudentListProps {
   students: StudentRecord[];
   onDelete: (id: string) => void;
-  onEdit?: (student: StudentRecord) => void;
+  onEdit?: (student: StudentRecord, answerKey?: string[]) => void;
   onClearAll?: () => void;
   title?: string;
   showPrint?: boolean;
@@ -37,9 +37,10 @@ export function StudentList({
   onDelete, 
   onEdit, 
   onClearAll, 
-  title = "Últimos lançamentos", 
+  title = "Registros", 
   showPrint = true, 
   profileData,
+  answerKey,
 }: StudentListProps) {
   const [currentDate, setCurrentDate] = useState<string>("");
 
@@ -145,7 +146,12 @@ export function StudentList({
                   <TableCell className="text-right no-print">
                     <div className="flex justify-end gap-1">
                       {onEdit && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => onEdit(student)}>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-muted-foreground hover:text-primary" 
+                          onClick={() => onEdit(student, answerKey)}
+                        >
                           <Edit2 className="h-4 w-4" />
                         </Button>
                       )}
