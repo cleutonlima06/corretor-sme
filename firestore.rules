@@ -32,5 +32,23 @@ service cloud.firestore {
       allow update: if isExistingOwner(professorId) && isUnchanged('professorId');
       allow delete: if isExistingOwner(professorId);
     }
+    match /users/{professorId}/classrooms/{classroomId} {
+      allow get, list: if isOwner(professorId);
+      allow create: if isOwner(professorId) && request.resource.data.professorId == professorId;
+      allow update: if isExistingOwner(professorId) && isUnchanged('professorId');
+      allow delete: if isExistingOwner(professorId);
+    }
+    match /users/{professorId}/classrooms/{classroomId}/exams/{examId} {
+      allow get, list, write: if isOwner(professorId);
+    }
+    match /users/{professorId}/classrooms/{classroomId}/exams/{examId}/questions/{questionId} {
+      allow get, list, write: if isOwner(professorId);
+    }
+    match /users/{professorId}/students/{studentId}/examAttempts/{examAttemptId} {
+      allow get, list, write: if isOwner(professorId);
+    }
+    match /users/{professorId}/students/{studentId}/examAttempts/{examAttemptId}/studentAnswers/{studentAnswerId} {
+      allow get, list, write: if isOwner(professorId);
+    }
   }
 }
