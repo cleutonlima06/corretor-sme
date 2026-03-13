@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -68,7 +67,7 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
       academicYear: formData.academicYear,
       subjectId: formData.subjectId,
       professorId: userId,
-      studentList: studentNames, // Associa a lista de alunos a esta turma específica
+      studentList: studentNames, 
       updatedAt: new Date().toISOString()
     }, { merge: true });
 
@@ -288,12 +287,12 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
               </CardContent>
             </Card>
 
-            <div className="pt-4">
+            <div className="pt-6 border-t mt-4">
               <Button type="submit" className="w-full gap-2 py-6 text-lg font-bold shadow-sm">
-                <Save className="h-5 w-5" /> Salvar Configurações e Arquivar
+                <Save className="h-5 w-5" /> Salvar Configurações e Arquivar Turma
               </Button>
               <p className="text-center text-[10px] text-muted-foreground mt-2">
-                Ao salvar, a turma será registrada no histórico e o perfil será limpo para a próxima configuração.
+                Ao clicar em salvar, a turma será registrada no histórico e o perfil será limpo para a próxima configuração.
               </p>
             </div>
           </form>

@@ -4,14 +4,11 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
-    }
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
-    }
-    function isUnchanged(fieldName) {
-      return request.resource.data[fieldName] == resource.data[fieldName];
+
+    // Regra Recursiva: O usuário (professor) tem acesso total a tudo dentro do seu próprio nó /users/{userId}
+    // Isso cobre /users/{uid}/professorProfile, /users/{uid}/classrooms, /users/{uid}/students e subcoleções.
+    match /users/{userId}/{allPaths=**} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
 
     match /schools/{schoolId} {
@@ -19,36 +16,6 @@ service cloud.firestore {
     }
     match /subjects/{subjectId} {
       allow get, list: if isSignedIn();
-    }
-    match /users/{professorId}/professorProfile/{profileId} {
-      allow get, list: if isOwner(professorId);
-      allow create: if isOwner(professorId) && request.resource.data.id == professorId;
-      allow update: if isOwner(professorId);
-      allow delete: if isOwner(professorId);
-    }
-    match /users/{professorId}/students/{studentId} {
-      allow get, list: if isOwner(professorId);
-      allow create: if isOwner(professorId) && request.resource.data.professorId == professorId;
-      allow update: if isExistingOwner(professorId) && isUnchanged('professorId');
-      allow delete: if isExistingOwner(professorId);
-    }
-    match /users/{professorId}/classrooms/{classroomId} {
-      allow get, list: if isOwner(professorId);
-      allow create: if isOwner(professorId) && request.resource.data.professorId == professorId;
-      allow update: if isExistingOwner(professorId) && isUnchanged('professorId');
-      allow delete: if isExistingOwner(professorId);
-    }
-    match /users/{professorId}/classrooms/{classroomId}/exams/{examId} {
-      allow get, list, write: if isOwner(professorId);
-    }
-    match /users/{professorId}/classrooms/{classroomId}/exams/{examId}/questions/{questionId} {
-      allow get, list, write: if isOwner(professorId);
-    }
-    match /users/{professorId}/students/{studentId}/examAttempts/{examAttemptId} {
-      allow get, list, write: if isOwner(professorId);
-    }
-    match /users/{professorId}/students/{studentId}/examAttempts/{examAttemptId}/studentAnswers/{studentAnswerId} {
-      allow get, list, write: if isOwner(professorId);
     }
   }
 }
