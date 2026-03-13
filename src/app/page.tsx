@@ -43,6 +43,9 @@ export default function SMEProDashboard() {
   const studentsQuery = useMemoFirebase(() => user ? query(collection(db, 'users', user.uid, 'students'), orderBy('createdAt', 'desc')) : null, [user, db]);
   const { data: allStudentsData, isLoading: isStudentsLoading } = useCollection<StudentRecord>(studentsQuery);
 
+  const classroomsQuery = useMemoFirebase(() => user ? query(collection(db, 'users', user.uid, 'classrooms'), orderBy('updatedAt', 'desc')) : null, [user, db]);
+  const { data: classroomsData, isLoading: isClassroomsLoading } = useCollection(classroomsQuery);
+
   const students = allStudentsData || [];
   
   const currentClassroomStudents = useMemo(() => {
@@ -57,7 +60,6 @@ export default function SMEProDashboard() {
       .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
   }, [allStudentsData, profileData]);
 
-  // Lista de nomes de alunos que já possuem registro nesta turma atual
   const existingStudentNames = useMemo(() => {
     return currentClassroomStudents.map(s => s.name);
   }, [currentClassroomStudents]);
@@ -207,7 +209,7 @@ export default function SMEProDashboard() {
 
   if (isUserLoading || !user) return null;
 
-  if (isProfileLoading || isStudentsLoading) {
+  if (isProfileLoading || isStudentsLoading || isClassroomsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -349,7 +351,7 @@ export default function SMEProDashboard() {
           </TabsContent>
 
           <TabsContent value="history" className="outline-none">
-            <ClassroomHistory students={students} onSelectClassroom={handleSelectClassroom} />
+            <ClassroomHistory classrooms={classroomsData || []} students={students} onSelectClassroom={handleSelectClassroom} />
           </TabsContent>
 
           <TabsContent value="settings" className="outline-none">

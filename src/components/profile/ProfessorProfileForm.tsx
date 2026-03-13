@@ -1,8 +1,9 @@
+
 "use client"
 
 import { useState, useEffect, useRef } from "react"
 import { useFirestore } from "@/firebase"
-import { doc } from "firebase/firestore"
+import { doc, collection } from "firebase/firestore"
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -45,30 +46,50 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
 
   const handleSaveProfile = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const docRef = doc(db, 'users', userId, 'professorProfile', userId);
     
-    setDocumentNonBlocking(docRef, {
+    // Referência do Perfil
+    const profileRef = doc(db, 'users', userId, 'professorProfile', userId);
+    
+    const dataToSave = {
       ...formData,
       studentList: studentNames,
       id: userId,
       updatedAt: new Date().toISOString()
-    }, { merge: true });
+    };
+
+    // Salva no perfil do professor
+    setDocumentNonBlocking(profileRef, dataToSave, { merge: true });
+
+    // Registra a turma na coleção de históricos (classrooms) se houver dados
+    if (formData.classroomId && formData.schoolId) {
+      const classId = `${formData.schoolId}-${formData.classroomId}-${formData.academicYear}-${formData.subjectId}`.replace(/\s+/g, '_');
+      const classRef = doc(db, 'users', userId, 'classrooms', classId);
+      
+      setDocumentNonBlocking(classRef, {
+        id: classId,
+        schoolId: formData.schoolId,
+        classroomId: formData.classroomId,
+        academicYear: formData.academicYear,
+        subjectId: formData.subjectId,
+        professorId: userId,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
 
     toast({
       title: "Configurações Salvas",
-      description: "As informações da turma foram atualizadas e estão prontas para os lançamentos.",
+      description: "As informações da turma foram atualizadas e a turma foi registrada no histórico.",
     });
   };
 
   const handleFinalizeClassroom = () => {
     const docRef = doc(db, 'users', userId, 'professorProfile', userId);
     
-    // Salva o estado atual uma última vez e limpa os campos de identificação da turma
     setDocumentNonBlocking(docRef, {
       classroomId: "",
       academicYear: "",
       subjectId: "",
-      studentList: [], // Limpa a lista de alunos para a nova turma
+      studentList: [], 
       updatedAt: new Date().toISOString()
     }, { merge: true });
 
@@ -82,7 +103,7 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
 
     toast({
       title: "Turma Finalizada",
-      description: "Os dados foram arquivados no histórico. O perfil está limpo para um novo cadastro.",
+      description: "O perfil está limpo para um novo cadastro. A turma finalizada permanece no histórico.",
     });
   };
 

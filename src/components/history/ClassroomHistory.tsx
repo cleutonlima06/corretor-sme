@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo } from "react"
@@ -8,48 +9,35 @@ import { Badge } from "@/components/ui/badge"
 import { Search, GraduationCap, ArrowRight, Calendar, BookOpen, School } from "lucide-react"
 
 interface ClassroomHistoryProps {
+  classrooms: any[];
   students: StudentRecord[];
   onSelectClassroom: (classroom: any) => void;
 }
 
-export function ClassroomHistory({ students, onSelectClassroom }: ClassroomHistoryProps) {
-  const classrooms = useMemo(() => {
-    const groups: Record<string, {
-      id: string;
-      schoolId: string;
-      classroomId: string;
-      academicYear: string;
-      subjectId: string;
-      studentCount: number;
-      avgPerformance: number;
-      lastUpdate: number;
-    }> = {};
+export function ClassroomHistory({ classrooms, students, onSelectClassroom }: ClassroomHistoryProps) {
+  const processedClassrooms = useMemo(() => {
+    return classrooms.map(cls => {
+      // Filtra alunos desta turma específica
+      const classStudents = students.filter(s => 
+        s.schoolId === cls.schoolId && 
+        s.classroomId === cls.classroomId && 
+        s.academicYear === cls.academicYear && 
+        s.subjectId === cls.subjectId
+      );
 
-    students.forEach(s => {
-      if (!s.classroomId) return;
-      const key = `${s.schoolId}-${s.classroomId}-${s.academicYear}-${s.subjectId}`;
-      if (!groups[key]) {
-        groups[key] = {
-          id: key,
-          schoolId: s.schoolId || "",
-          classroomId: s.classroomId || "",
-          academicYear: s.academicYear || "",
-          subjectId: s.subjectId || "",
-          studentCount: 0,
-          avgPerformance: 0,
-          lastUpdate: s.createdAt
-        };
-      }
-      groups[key].studentCount++;
-      groups[key].avgPerformance += s.percentage;
-      if (s.createdAt > groups[key].lastUpdate) groups[key].lastUpdate = s.createdAt;
-    });
+      const studentCount = classStudents.length;
+      const avgPerformance = studentCount > 0 
+        ? Math.round(classStudents.reduce((acc, s) => acc + s.percentage, 0) / studentCount)
+        : 0;
 
-    return Object.values(groups).map(g => ({
-      ...g,
-      avgPerformance: Math.round(g.avgPerformance / g.studentCount)
-    })).sort((a, b) => b.lastUpdate - a.lastUpdate);
-  }, [students]);
+      return {
+        ...cls,
+        studentCount,
+        avgPerformance,
+        lastUpdate: cls.updatedAt ? new Date(cls.updatedAt).getTime() : 0
+      };
+    }).sort((a, b) => b.lastUpdate - a.lastUpdate);
+  }, [classrooms, students]);
 
   return (
     <div className="space-y-6">
@@ -58,24 +46,24 @@ export function ClassroomHistory({ students, onSelectClassroom }: ClassroomHisto
         <h2 className="text-xl font-bold">Consultar Histórico de Turmas</h2>
       </div>
 
-      {classrooms.length === 0 ? (
+      {processedClassrooms.length === 0 ? (
         <Card className="bg-slate-50 border-dashed">
           <CardContent className="py-12 text-center text-muted-foreground italic">
-            Nenhuma turma com lançamentos concluídos foi encontrada.
+            Nenhuma turma cadastrada foi encontrada. Comece configurando uma no Perfil.
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {classrooms.map((cls) => (
+          {processedClassrooms.map((cls) => (
             <Card key={cls.id} className="hover:shadow-md transition-shadow border-primary/10 overflow-hidden group">
               <div className="h-2 bg-primary/20 w-full" />
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start mb-2">
                   <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
-                    {cls.studentCount} Alunos
+                    {cls.studentCount} Lançamentos
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    {new Date(cls.lastUpdate).toLocaleDateString('pt-BR')}
+                    {cls.updatedAt ? new Date(cls.updatedAt).toLocaleDateString('pt-BR') : 'Sem data'}
                   </span>
                 </div>
                 <CardTitle className="text-lg flex items-center gap-2">
