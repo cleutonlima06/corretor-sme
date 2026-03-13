@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { UserCircle, Save, School, GraduationCap, Calendar, BookOpen, UserPlus, Upload, Trash2, Users, FileSpreadsheet } from "lucide-react"
+import { UserCircle, Save, School, GraduationCap, Calendar, BookOpen, UserPlus, Trash2, Users, FileSpreadsheet, Eraser } from "lucide-react"
 import * as XLSX from "xlsx"
 
 interface ProfessorProfileFormProps {
@@ -55,8 +55,34 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
     }, { merge: true });
 
     toast({
-      title: "Perfil atualizado",
-      description: "Suas informações e lista de alunos foram salvas.",
+      title: "Configurações Salvas",
+      description: "As informações da turma foram atualizadas e estão prontas para os lançamentos.",
+    });
+  };
+
+  const handleFinalizeClassroom = () => {
+    const docRef = doc(db, 'users', userId, 'professorProfile', userId);
+    
+    // Salva o estado atual uma última vez e limpa os campos de identificação da turma
+    setDocumentNonBlocking(docRef, {
+      classroomId: "",
+      academicYear: "",
+      subjectId: "",
+      studentList: [], // Limpa a lista de alunos para a nova turma
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    setFormData(prev => ({
+      ...prev,
+      classroomId: "",
+      academicYear: "",
+      subjectId: "",
+    }));
+    setStudentNames([]);
+
+    toast({
+      title: "Turma Finalizada",
+      description: "Os dados foram arquivados no histórico. O perfil está limpo para um novo cadastro.",
     });
   };
 
@@ -91,7 +117,6 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         
-        // Converte para JSON tratando a primeira linha como cabeçalho
         const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet);
         
         if (jsonData.length === 0) {
@@ -103,7 +128,6 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
           return;
         }
 
-        // Procura pela coluna "Nome" (case insensitive)
         const importedNames: string[] = jsonData
           .map(row => {
             const key = Object.keys(row).find(k => k.toLowerCase() === 'nome');
@@ -203,9 +227,20 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full gap-2 py-6 text-lg font-bold">
-              <Save className="h-5 w-5" /> Salvar Configurações de Perfil
-            </Button>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <Button type="submit" className="flex-1 gap-2 py-6 text-lg font-bold shadow-sm">
+                <Save className="h-5 w-5" /> Salvar e Iniciar
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleFinalizeClassroom}
+                className="flex-1 gap-2 py-6 text-lg font-bold border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+              >
+                <Eraser className="h-5 w-5" /> Finalizar Turma e Limpar
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -253,11 +288,6 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
           <div className="border rounded-lg bg-slate-50/50">
             <div className="p-3 border-b bg-white rounded-t-lg flex justify-between items-center">
               <span className="text-xs font-bold text-muted-foreground uppercase">Alunos Cadastrados ({studentNames.length})</span>
-              {studentNames.length > 0 && (
-                <Button variant="link" size="sm" className="h-auto p-0 text-xs font-bold text-primary" onClick={() => handleSaveProfile()}>
-                  Confirmar e Salvar Lista
-                </Button>
-              )}
             </div>
             <div className="max-h-[300px] overflow-y-auto p-2">
               {studentNames.length === 0 ? (
