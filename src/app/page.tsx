@@ -19,7 +19,7 @@ import { ProfessorProfileForm } from "@/components/profile/ProfessorProfileForm"
 import { RankingAba } from "@/components/ranking/RankingAba"
 import { StudentRecord } from "@/lib/types"
 import { calculateScore, getPerformanceCategory } from "@/lib/grading"
-import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, CheckCircle2, Search, Trophy } from "lucide-react"
+import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, Search, Trophy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 
@@ -185,24 +185,6 @@ export default function SMEProDashboard() {
     setActiveTab("dashboard");
   };
 
-  const handleFinishClassroom = () => {
-    if (!user || !profileRef) return;
-
-    setDocumentNonBlocking(profileRef, {
-      classroomId: "",
-      academicYear: "",
-      subjectId: "",
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
-
-    toast({
-      title: "Lançamentos Concluídos",
-      description: "Os dados foram salvos no histórico. Configure a próxima turma no Perfil.",
-    });
-
-    setActiveTab("profile");
-  };
-
   const handleLogout = () => {
     auth.signOut().then(() => router.push('/login'));
   };
@@ -323,17 +305,6 @@ export default function SMEProDashboard() {
                 registeredNames={profileData?.studentList || []}
                 existingRecords={existingStudentNames}
               />
-              <div className="flex justify-center pt-4">
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100 gap-2 font-bold py-6 px-8 shadow-sm"
-                  onClick={handleFinishClassroom}
-                >
-                  <CheckCircle2 className="h-5 w-5" />
-                  Finalizar Lançamentos da Turma
-                </Button>
-              </div>
             </div>
           </TabsContent>
 

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { UserCircle, Save, School, GraduationCap, Calendar, BookOpen, UserPlus, Trash2, Users, FileSpreadsheet, Eraser } from "lucide-react"
+import { UserCircle, Save, School, GraduationCap, Calendar, BookOpen, UserPlus, Trash2, Users, FileSpreadsheet } from "lucide-react"
 import * as XLSX from "xlsx"
 
 interface ProfessorProfileFormProps {
@@ -47,7 +47,6 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
   const handleSaveProfile = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
-    // Referência do Perfil
     const profileRef = doc(db, 'users', userId, 'professorProfile', userId);
     
     const dataToSave = {
@@ -57,10 +56,8 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
       updatedAt: new Date().toISOString()
     };
 
-    // Salva no perfil do professor
     setDocumentNonBlocking(profileRef, dataToSave, { merge: true });
 
-    // Registra a turma na coleção de históricos (classrooms) se houver dados
     if (formData.classroomId && formData.schoolId) {
       const classId = `${formData.schoolId}-${formData.classroomId}-${formData.academicYear}-${formData.subjectId}`.replace(/\s+/g, '_');
       const classRef = doc(db, 'users', userId, 'classrooms', classId);
@@ -79,31 +76,6 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
     toast({
       title: "Configurações Salvas",
       description: "As informações da turma foram atualizadas e a turma foi registrada no histórico.",
-    });
-  };
-
-  const handleFinalizeClassroom = () => {
-    const docRef = doc(db, 'users', userId, 'professorProfile', userId);
-    
-    setDocumentNonBlocking(docRef, {
-      classroomId: "",
-      academicYear: "",
-      subjectId: "",
-      studentList: [], 
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
-
-    setFormData(prev => ({
-      ...prev,
-      classroomId: "",
-      academicYear: "",
-      subjectId: "",
-    }));
-    setStudentNames([]);
-
-    toast({
-      title: "Turma Finalizada",
-      description: "O perfil está limpo para um novo cadastro. A turma finalizada permanece no histórico.",
     });
   };
 
@@ -249,17 +221,9 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button type="submit" className="flex-1 gap-2 py-6 text-lg font-bold shadow-sm">
-                <Save className="h-5 w-5" /> Salvar e Iniciar
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={handleFinalizeClassroom}
-                className="flex-1 gap-2 py-6 text-lg font-bold border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-              >
-                <Eraser className="h-5 w-5" /> Finalizar Turma e Limpar
+            <div className="pt-4">
+              <Button type="submit" className="w-full gap-2 py-6 text-lg font-bold shadow-sm">
+                <Save className="h-5 w-5" /> Salvar Configurações e Turma
               </Button>
             </div>
           </form>
