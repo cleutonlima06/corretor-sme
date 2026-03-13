@@ -2,10 +2,10 @@
 "use client"
 
 import { useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, GraduationCap, ArrowRight, Calendar, BookOpen, School, Users } from "lucide-react"
+import { Search, GraduationCap, ArrowRight, Users } from "lucide-react"
 
 interface ClassroomHistoryProps {
   classrooms: any[];
@@ -35,10 +35,9 @@ export function ClassroomHistory({ classrooms, onSelectClassroom }: ClassroomHis
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sortedClassrooms.map((cls) => (
             <Card key={cls.id} className="hover:shadow-md transition-shadow border-primary/10 overflow-hidden group">
-              <div className="h-1 bg-primary/20 w-full" />
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start mb-2">
                   <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 gap-1 text-[10px]">
@@ -52,29 +51,15 @@ export function ClassroomHistory({ classrooms, onSelectClassroom }: ClassroomHis
                   <GraduationCap className="h-4 w-4 text-primary" />
                   {cls.classroomId}
                 </CardTitle>
-                <CardDescription className="flex items-center gap-1 text-xs">
-                  <School className="h-3 w-3" /> {cls.schoolId}
-                </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-2 text-[10px] uppercase font-bold text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" /> {cls.academicYear}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <BookOpen className="h-3 w-3" /> {cls.subjectId}
-                  </div>
-                </div>
-                
-                <div className="pt-2 border-t">
-                  <Button 
-                    size="sm" 
-                    className="w-full gap-2 font-bold"
-                    onClick={() => onSelectClassroom(cls)}
-                  >
-                    Abrir Turma <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </div>
+              <CardContent>
+                <Button 
+                  size="sm" 
+                  className="w-full gap-2 font-bold"
+                  onClick={() => onSelectClassroom(cls)}
+                >
+                  Abrir Turma <ArrowRight className="h-4 w-4" />
+                </Button>
               </CardContent>
             </Card>
           ))}

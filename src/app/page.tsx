@@ -184,7 +184,8 @@ export default function SMEProDashboard() {
       description: `A lista de ${cls.studentList?.length || 0} alunos foi carregada.`
     });
     
-    setActiveTab("dashboard");
+    // Switch directly to the Grading tab as requested
+    setActiveTab("input");
   };
 
   const handleLogout = () => {
