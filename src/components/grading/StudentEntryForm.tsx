@@ -31,26 +31,35 @@ export function StudentEntryForm({ questionCount, onAdd, registeredNames = [], e
   }, [registeredNames, questionCount]);
 
   const handleUpdateAnswer = (name: string, index: number, value: string) => {
+    // Se já foi salvo ou já existe registro, não permite edição
+    if (savedStatus[name] || existingRecords.includes(name)) return;
+
     setEntries(prev => ({
       ...prev,
       [name]: prev[name].map((ans, i) => i === index ? value.toUpperCase() : ans)
     }));
-    // Se editou, remove o status de salvo para forçar novo clique
-    if (savedStatus[name]) {
-      setSavedStatus(prev => ({ ...prev, [name]: false }));
-    }
   };
 
   const handleSaveStudent = (name: string) => {
     const answers = entries[name];
     if (!answers) return;
 
+    // Verifica se o aluno já foi salvo para evitar duplicidade
+    if (savedStatus[name] || existingRecords.includes(name)) {
+      toast({
+        variant: "destructive",
+        title: "Ação bloqueada",
+        description: `As notas de ${name} já foram registradas anteriormente.`
+      });
+      return;
+    }
+
     // Verifica se preencheu ao menos uma questão
     if (answers.every(a => !a.trim())) {
       toast({
         variant: "destructive",
-        title: "Atenção",
-        description: `Por favor, preencha as respostas de ${name}.`
+        title: "Campo vazio",
+        description: `Por favor, preencha as respostas de ${name} antes de salvar.`
       });
       return;
     }
@@ -59,8 +68,8 @@ export function StudentEntryForm({ questionCount, onAdd, registeredNames = [], e
     setSavedStatus(prev => ({ ...prev, [name]: true }));
     
     toast({
-      title: "Sucesso",
-      description: `Lançamento de ${name} registrado.`,
+      title: "Lançamento Realizado",
+      description: `As notas de ${name} foram salvas com sucesso.`,
     });
   };
 
@@ -83,7 +92,7 @@ export function StudentEntryForm({ questionCount, onAdd, registeredNames = [], e
       <div className="flex items-center justify-between bg-white p-4 rounded-xl border shadow-sm">
         <div>
           <h2 className="text-lg font-bold">Lançamento em Massa</h2>
-          <p className="text-xs text-muted-foreground">Preencha as respostas de cada aluno abaixo e clique em salvar.</p>
+          <p className="text-xs text-muted-foreground">O sistema permite apenas um salvamento por aluno para garantir a integridade dos dados.</p>
         </div>
         <div className="text-right">
           <span className="text-xs font-bold text-primary uppercase">Turma com {registeredNames.length} alunos</span>
@@ -94,20 +103,21 @@ export function StudentEntryForm({ questionCount, onAdd, registeredNames = [], e
         {registeredNames.map((name) => {
           const isSaved = savedStatus[name];
           const hasExisting = existingRecords.includes(name);
+          const isBlocked = isSaved || hasExisting;
 
           return (
             <Card key={name} className={cn(
               "shadow-sm transition-all border-l-4",
-              isSaved || hasExisting ? "border-l-green-500 opacity-80" : "border-l-primary/30"
+              isBlocked ? "border-l-green-500 bg-slate-50/50 opacity-90" : "border-l-primary/30"
             )}>
               <CardContent className="pt-6 pb-6">
                 <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
                   <div className="min-w-[180px] space-y-1">
                     <Label className="text-xs font-bold text-muted-foreground uppercase">Aluno</Label>
                     <p className="font-bold text-slate-800">{name}</p>
-                    {(isSaved || hasExisting) && (
+                    {isBlocked && (
                       <span className="flex items-center gap-1 text-[10px] text-green-600 font-bold uppercase">
-                        <CheckCircle2 className="h-3 w-3" /> Registrado
+                        <CheckCircle2 className="h-3 w-3" /> Lançamento Concluído
                       </span>
                     )}
                   </div>
@@ -119,11 +129,14 @@ export function StudentEntryForm({ questionCount, onAdd, registeredNames = [], e
                         <div key={idx} className="space-y-1">
                           <span className="block text-[10px] text-center text-muted-foreground font-medium">Q{idx + 1}</span>
                           <Input
-                            className="text-center font-bold uppercase h-10 w-full p-0 border-slate-200 focus:border-primary answer-box-transition"
+                            className={cn(
+                              "text-center font-bold uppercase h-10 w-full p-0 border-slate-200 focus:border-primary answer-box-transition",
+                              isBlocked && "bg-slate-100 border-transparent text-slate-400"
+                            )}
                             maxLength={1}
                             value={entries[name]?.[idx] || ""}
                             onChange={(e) => handleUpdateAnswer(name, idx, e.target.value)}
-                            disabled={isSaved}
+                            disabled={isBlocked}
                           />
                         </div>
                       ))}
@@ -133,11 +146,14 @@ export function StudentEntryForm({ questionCount, onAdd, registeredNames = [], e
                   <div className="shrink-0 w-full md:w-auto self-end md:self-center">
                     <Button 
                       onClick={() => handleSaveStudent(name)}
-                      disabled={isSaved}
-                      variant={isSaved ? "outline" : "default"}
-                      className={cn("w-full md:w-32 gap-2 font-bold", isSaved && "text-green-600 border-green-200")}
+                      disabled={isBlocked}
+                      variant={isBlocked ? "outline" : "default"}
+                      className={cn(
+                        "w-full md:w-32 gap-2 font-bold", 
+                        isBlocked && "text-green-600 border-green-200 bg-white hover:bg-white"
+                      )}
                     >
-                      {isSaved ? "Salvo" : "Salvar"}
+                      {isBlocked ? "Salvo" : "Salvar"}
                     </Button>
                   </div>
                 </div>
