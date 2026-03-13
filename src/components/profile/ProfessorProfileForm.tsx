@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -59,31 +60,50 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
     const classId = `${formData.schoolId}-${formData.classroomId}-${formData.academicYear}-${formData.subjectId}`.replace(/\s+/g, '_');
     const classRef = doc(db, 'users', userId, 'classrooms', classId);
     
-    // 1. Salva o registro completo na coleção de turmas (Histórico)
-    setDocumentNonBlocking(classRef, {
+    // Dados para salvar
+    const dataToSave = {
       id: classId,
       schoolId: formData.schoolId,
       classroomId: formData.classroomId,
       academicYear: formData.academicYear,
       subjectId: formData.subjectId,
       professorId: userId,
-      studentList: studentNames, 
+      studentList: studentNames,
+      answerKey: initialData?.answerKey || Array(10).fill(""),
+      updatedAt: new Date().toISOString()
+    };
+
+    // 1. Salva na coleção de turmas (Histórico)
+    setDocumentNonBlocking(classRef, dataToSave, { merge: true });
+
+    // 2. Salva no perfil ativo para que as outras abas atualizem
+    setDocumentNonBlocking(profileRef, {
+      ...formData,
+      studentList: studentNames,
       updatedAt: new Date().toISOString()
     }, { merge: true });
 
-    // 2. Limpa o perfil ativo para permitir nova turma
+    toast({
+      title: "Turma Cadastrada",
+      description: "As configurações foram salvas e a turma está disponível no histórico.",
+    });
+  };
+
+  const handleClearProfile = () => {
+    const profileRef = doc(db, 'users', userId, 'professorProfile', userId);
+    
     const emptyProfile = {
       schoolId: "",
       classroomId: "",
       academicYear: "",
       subjectId: "",
       studentList: [],
+      answerKey: Array(10).fill(""),
       updatedAt: new Date().toISOString()
     };
 
     setDocumentNonBlocking(profileRef, emptyProfile, { merge: true });
 
-    // 3. Reseta o estado local da interface
     setFormData({
       schoolId: "",
       classroomId: "",
@@ -94,8 +114,8 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
     setNewName("");
 
     toast({
-      title: "Turma Salva com Sucesso",
-      description: "Os dados foram arquivados no histórico e o perfil foi limpo para uma nova turma.",
+      title: "Perfil Limpo",
+      description: "Campos resetados para nova configuração.",
     });
   };
 
@@ -170,7 +190,7 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
             <UserCircle className="h-5 w-5 text-primary" />
             Configuração da Turma
           </CardTitle>
-          <CardDescription>Preencha os dados e a lista de alunos para iniciar os lançamentos.</CardDescription>
+          <CardDescription>Gerencie os dados da turma ativa e sua lista de alunos.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSaveProfile} className="space-y-6">
@@ -287,13 +307,13 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
               </CardContent>
             </Card>
 
-            <div className="pt-6 border-t mt-4">
-              <Button type="submit" className="w-full gap-2 py-6 text-lg font-bold shadow-sm">
-                <Save className="h-5 w-5" /> Salvar Configurações e Arquivar Turma
+            <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Button type="submit" className="w-full gap-2 font-bold">
+                <Save className="h-5 w-5" /> Salvar Configurações
               </Button>
-              <p className="text-center text-[10px] text-muted-foreground mt-2">
-                Ao clicar em salvar, a turma será registrada no histórico e o perfil será limpo para a próxima configuração.
-              </p>
+              <Button type="button" variant="outline" onClick={handleClearProfile} className="w-full gap-2 border-primary/20 hover:bg-primary/5">
+                <Trash2 className="h-5 w-5" /> Limpar Campos
+              </Button>
             </div>
           </form>
         </CardContent>

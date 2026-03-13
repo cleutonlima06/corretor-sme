@@ -174,12 +174,14 @@ export default function SMEProDashboard() {
       classroomId: cls.classroomId,
       academicYear: cls.academicYear,
       subjectId: cls.subjectId,
+      studentList: cls.studentList || [],
+      answerKey: cls.answerKey || Array(10).fill(""),
       updatedAt: new Date().toISOString()
     }, { merge: true });
 
     toast({
       title: "Turma Selecionada",
-      description: `Visualizando dados da turma ${cls.classroomId}.`
+      description: `A lista de ${cls.studentList?.length || 0} alunos foi carregada.`
     });
     
     setActiveTab("dashboard");
@@ -322,7 +324,7 @@ export default function SMEProDashboard() {
           </TabsContent>
 
           <TabsContent value="history" className="outline-none">
-            <ClassroomHistory classrooms={classroomsData || []} students={students} onSelectClassroom={handleSelectClassroom} />
+            <ClassroomHistory classrooms={classroomsData || []} onSelectClassroom={handleSelectClassroom} />
           </TabsContent>
 
           <TabsContent value="settings" className="outline-none">
