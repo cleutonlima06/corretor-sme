@@ -47,35 +47,56 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
   const handleSaveProfile = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     
+    if (!formData.schoolId || !formData.classroomId) {
+      toast({
+        variant: "destructive",
+        title: "Campos incompletos",
+        description: "Por favor, preencha ao menos a Escola e a Turma."
+      });
+      return;
+    }
+
     const profileRef = doc(db, 'users', userId, 'professorProfile', userId);
+    const classId = `${formData.schoolId}-${formData.classroomId}-${formData.academicYear}-${formData.subjectId}`.replace(/\s+/g, '_');
+    const classRef = doc(db, 'users', userId, 'classrooms', classId);
     
-    const dataToSave = {
-      ...formData,
-      studentList: studentNames,
-      id: userId,
+    // 1. Salva o registro completo na coleção de turmas (Histórico)
+    setDocumentNonBlocking(classRef, {
+      id: classId,
+      schoolId: formData.schoolId,
+      classroomId: formData.classroomId,
+      academicYear: formData.academicYear,
+      subjectId: formData.subjectId,
+      professorId: userId,
+      studentList: studentNames, // Associa a lista de alunos a esta turma específica
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+
+    // 2. Limpa o perfil ativo para permitir nova turma
+    const emptyProfile = {
+      schoolId: "",
+      classroomId: "",
+      academicYear: "",
+      subjectId: "",
+      studentList: [],
       updatedAt: new Date().toISOString()
     };
 
-    setDocumentNonBlocking(profileRef, dataToSave, { merge: true });
+    setDocumentNonBlocking(profileRef, emptyProfile, { merge: true });
 
-    if (formData.classroomId && formData.schoolId) {
-      const classId = `${formData.schoolId}-${formData.classroomId}-${formData.academicYear}-${formData.subjectId}`.replace(/\s+/g, '_');
-      const classRef = doc(db, 'users', userId, 'classrooms', classId);
-      
-      setDocumentNonBlocking(classRef, {
-        id: classId,
-        schoolId: formData.schoolId,
-        classroomId: formData.classroomId,
-        academicYear: formData.academicYear,
-        subjectId: formData.subjectId,
-        professorId: userId,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-    }
+    // 3. Reseta o estado local da interface
+    setFormData({
+      schoolId: "",
+      classroomId: "",
+      academicYear: "",
+      subjectId: "",
+    });
+    setStudentNames([]);
+    setNewName("");
 
     toast({
-      title: "Configurações Salvas",
-      description: "As informações da turma foram atualizadas e registradas no histórico.",
+      title: "Turma Salva com Sucesso",
+      description: "Os dados foram arquivados no histórico e o perfil foi limpo para uma nova turma.",
     });
   };
 
@@ -148,9 +169,9 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserCircle className="h-5 w-5 text-primary" />
-            Perfil do Professor
+            Configuração da Turma
           </CardTitle>
-          <CardDescription>Configure os dados da sua escola e turma atual.</CardDescription>
+          <CardDescription>Preencha os dados e a lista de alunos para iniciar os lançamentos.</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSaveProfile} className="space-y-6">
@@ -206,83 +227,76 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
               </div>
             </div>
 
-            <div className="pt-4">
-              <Button type="submit" className="w-full gap-2 py-6 text-lg font-bold shadow-sm">
-                <Save className="h-5 w-5" /> Salvar Configurações
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card className="shadow-md border-primary/10">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5 text-primary" />
-            Lista de Alunos da Turma
-          </CardTitle>
-          <CardDescription>Cadastre ou importe os nomes dos alunos que aparecerão na aba de lançamentos.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="newStudent">Cadastrar Aluno Individualmente</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="newStudent"
-                  placeholder="Digite o nome completo"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
-                />
-                <Button onClick={handleAddStudent} size="icon" className="shrink-0">
-                  <UserPlus className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-2 shrink-0">
-              <Label>Cadastro em Massa</Label>
-              <Button variant="outline" onClick={handleImportClick} className="w-full gap-2 border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors">
-                <FileSpreadsheet className="h-4 w-4 text-primary" /> Importar Excel
-              </Button>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
-                accept=".xlsx,.xls,.csv" 
-                onChange={handleFileImport}
-              />
-            </div>
-          </div>
-
-          <div className="border rounded-lg bg-slate-50/50">
-            <div className="p-3 border-b bg-white rounded-t-lg flex justify-between items-center">
-              <span className="text-xs font-bold text-muted-foreground uppercase">Alunos Cadastrados ({studentNames.length})</span>
-            </div>
-            <div className="max-h-[300px] overflow-y-auto p-2">
-              {studentNames.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-sm text-muted-foreground italic">Nenhum aluno cadastrado.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {studentNames.map((name, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-white border rounded-md group hover:border-primary/30 transition-colors">
-                      <span className="text-sm truncate font-medium">{name}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleRemoveStudent(name)}
-                      >
-                        <Trash2 className="h-3 w-3" />
+            <Card className="border-primary/10 bg-slate-50/30">
+              <CardHeader className="py-4">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Users className="h-4 w-4 text-primary" />
+                  Alunos da Turma ({studentNames.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Nome do aluno"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddStudent())}
+                      />
+                      <Button type="button" onClick={handleAddStudent} size="icon" className="shrink-0">
+                        <UserPlus className="h-4 w-4" />
                       </Button>
                     </div>
-                  ))}
+                  </div>
+                  <div className="shrink-0">
+                    <Button type="button" variant="outline" onClick={handleImportClick} className="w-full gap-2 border-primary/20 bg-white">
+                      <FileSpreadsheet className="h-4 w-4 text-primary" /> Importar Excel
+                    </Button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept=".xlsx,.xls,.csv" 
+                      onChange={handleFileImport}
+                    />
+                  </div>
                 </div>
-              )}
+
+                <div className="max-h-[200px] overflow-y-auto border rounded-md bg-white p-2">
+                  {studentNames.length === 0 ? (
+                    <p className="text-center py-8 text-xs text-muted-foreground italic">Nenhum aluno adicionado.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {studentNames.map((name, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-slate-50 border rounded text-sm">
+                          <span className="truncate">{name}</span>
+                          <Button 
+                            type="button"
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                            onClick={() => handleRemoveStudent(name)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="pt-4">
+              <Button type="submit" className="w-full gap-2 py-6 text-lg font-bold shadow-sm">
+                <Save className="h-5 w-5" /> Salvar Configurações e Arquivar
+              </Button>
+              <p className="text-center text-[10px] text-muted-foreground mt-2">
+                Ao salvar, a turma será registrada no histórico e o perfil será limpo para a próxima configuração.
+              </p>
             </div>
-          </div>
+          </form>
         </CardContent>
       </Card>
     </div>

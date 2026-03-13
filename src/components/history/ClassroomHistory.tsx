@@ -6,7 +6,7 @@ import { StudentRecord } from "@/lib/types"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Search, GraduationCap, ArrowRight, Calendar, BookOpen, School } from "lucide-react"
+import { Search, GraduationCap, ArrowRight, Calendar, BookOpen, School, Users } from "lucide-react"
 
 interface ClassroomHistoryProps {
   classrooms: any[];
@@ -17,22 +17,26 @@ interface ClassroomHistoryProps {
 export function ClassroomHistory({ classrooms, students, onSelectClassroom }: ClassroomHistoryProps) {
   const processedClassrooms = useMemo(() => {
     return classrooms.map(cls => {
-      // Filtra alunos desta turma específica
-      const classStudents = students.filter(s => 
+      // Filtra lançamentos feitos para esta turma
+      const classLaunches = students.filter(s => 
         s.schoolId === cls.schoolId && 
         s.classroomId === cls.classroomId && 
         s.academicYear === cls.academicYear && 
         s.subjectId === cls.subjectId
       );
 
-      const studentCount = classStudents.length;
-      const avgPerformance = studentCount > 0 
-        ? Math.round(classStudents.reduce((acc, s) => acc + s.percentage, 0) / studentCount)
+      const launchCount = classLaunches.length;
+      const avgPerformance = launchCount > 0 
+        ? Math.round(classLaunches.reduce((acc, s) => acc + s.percentage, 0) / launchCount)
         : 0;
+
+      // Lista total de alunos que estavam vinculados à turma no momento do salvamento
+      const totalStudentsInClass = cls.studentList?.length || 0;
 
       return {
         ...cls,
-        studentCount,
+        launchCount,
+        totalStudentsInClass,
         avgPerformance,
         lastUpdate: cls.updatedAt ? new Date(cls.updatedAt).getTime() : 0
       };
@@ -59,8 +63,8 @@ export function ClassroomHistory({ classrooms, students, onSelectClassroom }: Cl
               <div className="h-2 bg-primary/20 w-full" />
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start mb-2">
-                  <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
-                    {cls.studentCount} Lançamentos
+                  <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 gap-1">
+                    <Users className="h-3 w-3" /> {cls.totalStudentsInClass} Alunos
                   </Badge>
                   <span className="text-xs text-muted-foreground">
                     {cls.updatedAt ? new Date(cls.updatedAt).toLocaleDateString('pt-BR') : 'Sem data'}
@@ -86,7 +90,9 @@ export function ClassroomHistory({ classrooms, students, onSelectClassroom }: Cl
                 
                 <div className="pt-2 border-t flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] uppercase font-bold text-muted-foreground">Desempenho Médio</p>
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground">
+                      {cls.launchCount} Lançados
+                    </p>
                     <p className="text-xl font-bold text-primary">{cls.avgPerformance}%</p>
                   </div>
                   <Button 
