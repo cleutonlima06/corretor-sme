@@ -19,9 +19,18 @@ import { ProfessorProfileForm } from "@/components/profile/ProfessorProfileForm"
 import { RankingAba } from "@/components/ranking/RankingAba"
 import { StudentRecord } from "@/lib/types"
 import { calculateScore, getPerformanceCategory } from "@/lib/grading"
-import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, Search, Trophy } from "lucide-react"
+import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, Search, Trophy, ShieldCheck, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription, 
+  DialogFooter 
+} from "@/components/ui/dialog"
 
 export default function SMEProDashboard() {
   const { user, isUserLoading } = useUser();
@@ -33,6 +42,12 @@ export default function SMEProDashboard() {
   const [editingStudent, setEditingStudent] = useState<StudentRecord | null>(null);
   const [editingAnswerKey, setEditingAnswerKey] = useState<string[] | null>(null);
   const [activeTab, setActiveTab] = useState("dashboard");
+  
+  // Estados para o bloqueio ADM
+  const [isAdmAuthorized, setIsAdmAuthorized] = useState(false);
+  const [showPassDialog, setShowPassDialog] = useState(false);
+  const [pendingTab, setPendingTab] = useState("");
+  const [admPassword, setAdmPassword] = useState("");
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -84,6 +99,34 @@ export default function SMEProDashboard() {
 
   const answerKey = profileData?.answerKey || Array(10).fill("");
 
+  const handleTabChange = (value: string) => {
+    if ((value === "profile" || value === "settings") && !isAdmAuthorized) {
+      setPendingTab(value);
+      setShowPassDialog(true);
+      setAdmPassword("");
+    } else {
+      setActiveTab(value);
+    }
+  };
+
+  const verifyAdmPassword = () => {
+    if (admPassword === "adm01") {
+      setIsAdmAuthorized(true);
+      setActiveTab(pendingTab);
+      setShowPassDialog(false);
+      toast({
+        title: "Acesso Autorizado",
+        description: "Bem-vindo às configurações de administrador.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Senha incorreta",
+        description: "O acesso a esta aba é restrito.",
+      });
+    }
+  };
+
   const handleSaveAnswerKey = (newKey: string[]) => {
     if (!user || !profileRef) return;
     
@@ -114,7 +157,7 @@ export default function SMEProDashboard() {
         title: "Turma não configurada",
         description: "Defina os dados da turma no perfil antes de lançar notas."
       });
-      setActiveTab("profile");
+      handleTabChange("profile");
       return;
     }
     const score = calculateScore(answers, answerKey);
@@ -193,7 +236,7 @@ export default function SMEProDashboard() {
       description: `A lista de ${cls.studentList?.length || 0} alunos e o gabarito foram carregados.`
     });
     
-    setActiveTab("input");
+    handleTabChange("input");
   };
 
   const handleOpenEdit = (student: StudentRecord, customKey?: string[]) => {
@@ -252,7 +295,7 @@ export default function SMEProDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 md:px-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
           <div className="flex justify-center md:justify-start no-print overflow-x-auto pb-2">
             <TabsList className="bg-white border shadow-sm p-1 rounded-xl">
               <TabsTrigger value="dashboard" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
@@ -330,7 +373,6 @@ export default function SMEProDashboard() {
               showPrint={true} 
               profileData={profileData}
               answerKey={answerKey}
-              // onDelete removido conforme solicitado
             />
           </TabsContent>
 
@@ -356,6 +398,39 @@ export default function SMEProDashboard() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Diálogo de Bloqueio ADM */}
+        <Dialog open={showPassDialog} onOpenChange={(open) => !open && setShowPassDialog(false)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                Acesso Restrito
+              </DialogTitle>
+              <DialogDescription>
+                Digite a senha de administrador para acessar esta seção.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Input
+                type="password"
+                placeholder="Senha de Acesso"
+                value={admPassword}
+                onChange={(e) => setAdmPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && verifyAdmPassword()}
+                autoFocus
+              />
+            </div>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={() => setShowPassDialog(false)} className="sm:flex-1">
+                Cancelar
+              </Button>
+              <Button onClick={verifyAdmPassword} className="sm:flex-1 font-bold">
+                Acessar Aba
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         <StudentEditDialog 
           student={editingStudent} 
