@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -132,8 +131,8 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
         </Button>
       </div>
 
-      <div className="print-chart-container w-full print:bg-slate-50 print:p-8 print:rounded-2xl print:border-2 print:border-primary/10">
-        <ChartContainer config={chartConfig} className="h-[400px] w-full print:h-[650px]">
+      <div className="print-chart-container w-full flex justify-center items-center">
+        <ChartContainer config={chartConfig} className="h-[400px] w-full print:h-[750px] print:w-[95%]">
           <BarChart 
             accessibilityLayer 
             data={data} 
@@ -155,7 +154,7 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
               allowDecimals={false}
             />
             <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
-            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={55}>
+            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={60}>
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}

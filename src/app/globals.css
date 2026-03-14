@@ -96,10 +96,19 @@
     max-width: 100% !important;
     border: none !important;
     box-shadow: none !important;
+    background: transparent !important;
   }
 
-  /* Garante que o gráfico Recharts seja visível na impressão */
+  /* Garante que o gráfico Recharts seja visível e centralizado na impressão */
   .recharts-surface {
     overflow: visible !important;
+    margin: 0 auto;
+  }
+
+  /* Remove backgrounds e sombras de cards na impressão */
+  .bg-card, .bg-white, .bg-slate-50 {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
   }
 }
