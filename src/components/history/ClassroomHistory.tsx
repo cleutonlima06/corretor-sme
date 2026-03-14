@@ -65,6 +65,7 @@ export function ClassroomHistory({
           showPrint={true}
           profileData={viewingClassroom}
           answerKey={viewingClassroom.answerKey}
+          requireConfirmDelete={true}
         />
         
         <div className="pt-4 border-t border-dashed">
@@ -103,7 +104,7 @@ export function ClassroomHistory({
                   </span>
                 </div>
                 <CardTitle className="text-base flex items-center gap-2">
-                  <GraduationCap className="h-4 w-4 text-primary" />
+                  < GraduationCap className="h-4 w-4 text-primary" />
                   {cls.classroomId}
                 </CardTitle>
                 <p className="text-[10px] text-muted-foreground uppercase truncate">{cls.schoolId} • {cls.subjectId}</p>

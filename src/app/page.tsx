@@ -221,7 +221,7 @@ export default function SMEProDashboard() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="bg-white p-2 rounded-xl shadow-inner">
-              <GraduationCap className="h-8 w-8 text-primary" />
+              < GraduationCap className="h-8 w-8 text-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Corretor SME Pro</h1>
@@ -326,7 +326,6 @@ export default function SMEProDashboard() {
           <TabsContent value="students" className="outline-none">
             <StudentList 
               students={currentClassroomStudents} 
-              onDelete={handleDeleteStudent} 
               onClearAll={handleClearAllStudents}
               title="Relatório da Turma Ativa" 
               showPrint={true} 

@@ -23,13 +23,14 @@ import {
 
 interface StudentListProps {
   students: StudentRecord[];
-  onDelete: (id: string) => void;
+  onDelete?: (id: string) => void;
   onEdit?: (student: StudentRecord, answerKey?: string[]) => void;
   onClearAll?: () => void;
   title?: string;
   showPrint?: boolean;
   profileData?: any;
   answerKey?: string[];
+  requireConfirmDelete?: boolean;
 }
 
 export function StudentList({ 
@@ -41,6 +42,7 @@ export function StudentList({
   showPrint = true, 
   profileData,
   answerKey,
+  requireConfirmDelete = false,
 }: StudentListProps) {
   const [currentDate, setCurrentDate] = useState<string>("");
 
@@ -58,7 +60,7 @@ export function StudentList({
         <div className="flex justify-between items-start">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-primary">
-              <GraduationCap className="h-6 w-6" />
+              < GraduationCap className="h-6 w-6" />
               <h1 className="text-2xl font-bold tracking-tight">Corretor SME Pro</h1>
             </div>
             <p className="text-muted-foreground text-sm italic">Relatório Oficial de Desempenho - Gerado em {currentDate}</p>
@@ -155,9 +157,38 @@ export function StudentList({
                           <Edit2 className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => onDelete(student.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {onDelete && (
+                        requireConfirmDelete ? (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir Registro?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja remover o registro de <strong>{student.name}</strong>? Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => onDelete(student.id)} 
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Confirmar Exclusão
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        ) : (
+                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive h-8 w-8" onClick={() => onDelete(student.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
