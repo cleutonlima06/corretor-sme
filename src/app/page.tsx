@@ -288,7 +288,6 @@ export default function SMEProDashboard() {
                 <AIInsightsPanel answerKey={answerKey} students={currentClassroomStudents} />
                 <StudentList 
                   students={recentStudents} 
-                  onDelete={handleDeleteStudent} 
                   title="Últimos lançamentos" 
                   showPrint={false} 
                   answerKey={answerKey}
