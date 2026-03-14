@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell, Text } from "recharts"
 import {
   ChartConfig,
   ChartContainer,
@@ -40,6 +40,32 @@ interface PerformanceChartProps {
   profileData?: any;
 }
 
+// Componente para renderizar as legendas do eixo X sem rotação e com quebra de linha
+const CustomTick = (props: any) => {
+  const { x, y, payload } = props;
+  const words = payload.value.split(" ");
+  
+  return (
+    <g transform={`translate(${x},${y})`}>
+      {words.map((word: string, index: number) => (
+        <text
+          key={index}
+          x={0}
+          y={index * 12}
+          dy={16}
+          textAnchor="middle"
+          fill="hsl(var(--muted-foreground))"
+          fontSize={10}
+          fontWeight={600}
+          className="uppercase"
+        >
+          {word}
+        </text>
+      ))}
+    </g>
+  );
+};
+
 export function PerformanceChart({ students, profileData }: PerformanceChartProps) {
   const [currentDate, setCurrentDate] = useState<string>("");
 
@@ -49,7 +75,7 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
 
   const data = [
     { 
-      category: "Abaixo do Básico", 
+      category: "Abaixo do básico", 
       count: students.filter(s => s.category === 'ABAIXO DO BÁSICO').length,
       fill: "var(--color-abaixo)"
     },
@@ -76,7 +102,6 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
 
   return (
     <div className="space-y-4 print-full-width">
-      {/* Cabeçalho exclusivo para o PDF de desempenho */}
       <div className="hidden print:block mb-8 border-b-2 border-primary/20 pb-6 w-full">
         <div className="flex justify-between items-start">
           <div className="space-y-2">
@@ -117,19 +142,16 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
           <BarChart 
             accessibilityLayer 
             data={data} 
-            margin={{ top: 30, right: 30, left: 20, bottom: 70 }}
+            margin={{ top: 30, right: 30, left: 20, bottom: 60 }}
           >
             <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.5} />
             <XAxis
               dataKey="category"
               tickLine={false}
-              tickMargin={20}
               axisLine={false}
-              fontSize={11}
-              fontWeight={600}
               interval={0}
-              angle={-15}
-              textAnchor="end"
+              height={70}
+              tick={<CustomTick />}
             />
             <YAxis 
               tickLine={false} 
@@ -138,7 +160,7 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
               allowDecimals={false}
             />
             <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
-            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={65}>
+            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={55}>
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
