@@ -60,7 +60,7 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
     const classId = `${formData.schoolId}-${formData.classroomId}-${formData.academicYear}-${formData.subjectId}`.replace(/\s+/g, '_');
     const classRef = doc(db, 'users', userId, 'classrooms', classId);
     
-    // Dados para salvar
+    // Dados para salvar no histórico
     const dataToSave = {
       id: classId,
       schoolId: formData.schoolId,
@@ -76,16 +76,29 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
     // 1. Salva na coleção de turmas (Histórico)
     setDocumentNonBlocking(classRef, dataToSave, { merge: true });
 
-    // 2. Salva no perfil ativo para que as outras abas atualizem
+    // 2. Limpa o perfil ativo para nova turma (oculta a lista e limpa campos conforme solicitado)
     setDocumentNonBlocking(profileRef, {
-      ...formData,
-      studentList: studentNames,
+      schoolId: "",
+      classroomId: "",
+      academicYear: "",
+      subjectId: "",
+      studentList: [],
       updatedAt: new Date().toISOString()
     }, { merge: true });
 
+    // Limpa estado local para ocultar a lista nesta aba
+    setFormData({
+      schoolId: "",
+      classroomId: "",
+      academicYear: "",
+      subjectId: "",
+    });
+    setStudentNames([]);
+    setNewName("");
+
     toast({
-      title: "Turma Cadastrada",
-      description: "As configurações foram salvas e a turma está disponível no histórico.",
+      title: "Turma Finalizada",
+      description: "Os dados foram arquivados no histórico e a lista foi ocultada para nova turma.",
     });
   };
 
@@ -98,7 +111,6 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
       academicYear: "",
       subjectId: "",
       studentList: [],
-      answerKey: Array(10).fill(""),
       updatedAt: new Date().toISOString()
     };
 
@@ -114,8 +126,8 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
     setNewName("");
 
     toast({
-      title: "Perfil Limpo",
-      description: "Campos resetados para nova configuração.",
+      title: "Campos Limpos",
+      description: "O formulário foi resetado.",
     });
   };
 
