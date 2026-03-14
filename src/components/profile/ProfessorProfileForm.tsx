@@ -12,6 +12,17 @@ import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
 import { UserCircle, Save, School, GraduationCap, Calendar, BookOpen, UserPlus, Trash2, Users, FileSpreadsheet } from "lucide-react"
 import * as XLSX from "xlsx"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface ProfessorProfileFormProps {
   userId: string;
@@ -302,15 +313,35 @@ export function ProfessorProfileForm({ userId, initialData }: ProfessorProfileFo
                       {studentNames.map((name, index) => (
                         <div key={index} className="flex items-center justify-between p-2 bg-slate-50 border rounded text-sm">
                           <span className="truncate">{name}</span>
-                          <Button 
-                            type="button"
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                            onClick={() => handleRemoveStudent(name)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                type="button"
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Remover Aluno?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja remover <strong>{name}</strong> desta lista?
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleRemoveStudent(name)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Confirmar Remoção
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       ))}
                     </div>
