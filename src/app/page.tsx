@@ -87,13 +87,11 @@ export default function SMEProDashboard() {
   const handleSaveAnswerKey = (newKey: string[]) => {
     if (!user || !profileRef) return;
     
-    // Atualiza o perfil ativo
     setDocumentNonBlocking(profileRef, { 
       answerKey: newKey,
       updatedAt: new Date().toISOString() 
     }, { merge: true });
 
-    // Sincroniza com o registro da turma no histórico se houver uma turma ativa
     if (profileData?.schoolId && profileData?.classroomId) {
       const classId = `${profileData.schoolId}-${profileData.classroomId}-${profileData.academicYear}-${profileData.subjectId}`.replace(/\s+/g, '_');
       const classRef = doc(db, 'users', user.uid, 'classrooms', classId);
@@ -105,7 +103,7 @@ export default function SMEProDashboard() {
     
     toast({
       title: "Gabarito salvo",
-      description: "As respostas oficiais foram atualizadas com sucesso e vinculadas à turma.",
+      description: "As respostas oficiais foram atualizadas com sucesso.",
     });
   };
 
