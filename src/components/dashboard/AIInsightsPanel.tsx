@@ -6,13 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Sparkles, Loader2, AlertTriangle, Lightbulb, BookOpen } from "lucide-react"
 import { analyzeEducatorInsights, EducatorInsightAnalysisOutput } from "@/ai/flows/educator-insight-analysis"
 import { StudentRecord } from "@/lib/types"
+import { useToast } from "@/hooks/use-toast"
 
 export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], students: StudentRecord[] }) {
   const [loading, setLoading] = useState(false);
   const [insights, setInsights] = useState<EducatorInsightAnalysisOutput | null>(null);
+  const { toast } = useToast();
 
   const handleAnalyze = async () => {
-    if (students.length === 0) return;
+    if (students.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Ação necessária",
+        description: "Lance as notas de pelo menos um aluno para gerar a análise inteligente."
+      });
+      return;
+    }
     
     setLoading(true);
     try {
@@ -24,8 +33,17 @@ export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], 
         }))
       });
       setInsights(result);
+      toast({
+        title: "Sucesso!",
+        description: "A análise de inteligência artificial foi concluída com êxito."
+      });
     } catch (error: any) {
       console.error("Erro na análise de IA:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro na Análise",
+        description: "Ocorreu uma falha ao processar os insights. Tente novamente em instantes."
+      });
     } finally {
       setLoading(false);
     }
@@ -44,10 +62,14 @@ export function AIInsightsPanel({ answerKey, students }: { answerKey: string[], 
           </div>
           <Button 
             onClick={handleAnalyze} 
-            disabled={loading || students.length === 0}
-            className="bg-primary hover:bg-primary/90"
+            disabled={loading}
+            className="bg-primary hover:bg-primary/90 font-bold px-6"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Gerar Insights"}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" /> Analisando...
+              </span>
+            ) : "Gerar Insights"}
           </Button>
         </div>
       </CardHeader>
