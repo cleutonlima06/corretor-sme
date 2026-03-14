@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell, Text } from "recharts"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from "recharts"
 import {
   ChartConfig,
   ChartContainer,
@@ -35,12 +35,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-interface PerformanceChartProps {
-  students: StudentRecord[];
-  profileData?: any;
-}
-
-// Componente para renderizar as legendas do eixo X sem rotação e com quebra de linha
+// Componente para renderizar as legendas do eixo X sem rotação, com fonte menor e quebra de linha
 const CustomTick = (props: any) => {
   const { x, y, payload } = props;
   const words = payload.value.split(" ");
@@ -51,11 +46,11 @@ const CustomTick = (props: any) => {
         <text
           key={index}
           x={0}
-          y={index * 12}
+          y={index * 9}
           dy={16}
           textAnchor="middle"
           fill="hsl(var(--muted-foreground))"
-          fontSize={10}
+          fontSize={8}
           fontWeight={600}
           className="uppercase"
         >
@@ -174,4 +169,9 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
       </div>
     </div>
   )
+}
+
+interface PerformanceChartProps {
+  students: StudentRecord[];
+  profileData?: any;
 }
