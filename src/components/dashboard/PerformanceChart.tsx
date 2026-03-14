@@ -123,6 +123,7 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
               axisLine={false}
               fontSize={12}
               fontWeight={600}
+              interval={0}
             />
             <YAxis 
               tickLine={false} 
