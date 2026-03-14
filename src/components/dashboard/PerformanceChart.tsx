@@ -112,18 +112,24 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
         </Button>
       </div>
 
-      <div className="print-chart-container w-full">
-        <ChartContainer config={chartConfig} className="h-[400px] w-full print:h-[500px]">
-          <BarChart accessibilityLayer data={data} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
+      <div className="print-chart-container w-full print:bg-slate-50 print:p-8 print:rounded-2xl print:border-2 print:border-primary/10">
+        <ChartContainer config={chartConfig} className="h-[400px] w-full print:h-[650px]">
+          <BarChart 
+            accessibilityLayer 
+            data={data} 
+            margin={{ top: 30, right: 30, left: 20, bottom: 70 }}
+          >
             <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.5} />
             <XAxis
               dataKey="category"
               tickLine={false}
-              tickMargin={10}
+              tickMargin={20}
               axisLine={false}
-              fontSize={12}
+              fontSize={11}
               fontWeight={600}
               interval={0}
+              angle={-15}
+              textAnchor="end"
             />
             <YAxis 
               tickLine={false} 
@@ -132,7 +138,7 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
               allowDecimals={false}
             />
             <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
-            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={60}>
+            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={65}>
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
