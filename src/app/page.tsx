@@ -330,6 +330,7 @@ export default function SMEProDashboard() {
               showPrint={true} 
               profileData={profileData}
               answerKey={answerKey}
+              // onDelete removido conforme solicitado
             />
           </TabsContent>
 

@@ -65,7 +65,7 @@ export function ClassroomHistory({
           showPrint={true}
           profileData={viewingClassroom}
           answerKey={viewingClassroom.answerKey}
-          requireConfirmDelete={true}
+          requireConfirmDelete={true} // Habilita a confirmação de exclusão
         />
         
         <div className="pt-4 border-t border-dashed">
