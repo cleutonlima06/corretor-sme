@@ -62,7 +62,7 @@ export function ClassroomHistory({
           onDelete={onDeleteStudent}
           onEdit={onEditStudent}
           title="Alunos e Lançamentos"
-          showPrint={true}
+          showPrint={false}
           profileData={viewingClassroom}
           answerKey={viewingClassroom.answerKey}
           requireConfirmDelete={true} // Habilita a confirmação de exclusão
