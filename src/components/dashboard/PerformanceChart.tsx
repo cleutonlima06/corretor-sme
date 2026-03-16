@@ -107,7 +107,7 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-primary">
               <GraduationCap className="h-6 w-6" />
-              <h1 className="text-2xl font-bold tracking-tight text-black">Corretor SME Pro</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-black">AvaLink Poranga</h1>
             </div>
             <p className="text-muted-foreground text-sm italic">Relatório de Distribuição de Desempenho - {currentDate}</p>
           </div>
@@ -171,7 +171,7 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
       </div>
 
       <div className="hidden print:block mt-8 pt-4 border-t border-slate-100 text-center text-[10px] text-muted-foreground">
-        Gráfico gerado pelo sistema Corretor SME Pro em página única. Total de alunos analisados: {students.length}.
+        Gráfico gerado pelo sistema AvaLink Poranga em página única. Total de alunos analisados: {students.length}.
       </div>
     </div>
   )

@@ -4,7 +4,7 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Corretor SME Pro',
+  title: 'AvaLink Poranga',
   description: 'Sistema de Correção e Análise Educacional',
 };
 

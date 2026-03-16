@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -267,7 +266,7 @@ export default function SMEProDashboard() {
               < GraduationCap className="h-8 w-8 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Corretor SME Pro</h1>
+              <h1 className="text-2xl font-bold tracking-tight">AvaLink Poranga</h1>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-white/80 text-xs font-light mt-1">
                 {profileData && profileData.schoolId && profileData.classroomId ? (
                   <>
@@ -441,7 +440,7 @@ export default function SMEProDashboard() {
       </main>
       
       <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t py-2 px-8 text-center text-xs text-muted-foreground no-print">
-        Sistema Corretor SME Pro &copy; {currentYear > 0 ? currentYear : ''} - Gestão educacional simplificada.
+        Sistema AvaLink Poranga &copy; {currentYear > 0 ? currentYear : ''} - Gestão educacional simplificada.
       </footer>
     </div>
   );

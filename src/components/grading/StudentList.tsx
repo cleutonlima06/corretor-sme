@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -61,7 +60,7 @@ export function StudentList({
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-primary">
               < GraduationCap className="h-6 w-6" />
-              <h1 className="text-2xl font-bold tracking-tight">Corretor SME Pro</h1>
+              <h1 className="text-2xl font-bold tracking-tight">AvaLink Poranga</h1>
             </div>
             <p className="text-muted-foreground text-sm italic">Relatório Oficial de Desempenho - Gerado em {currentDate}</p>
           </div>

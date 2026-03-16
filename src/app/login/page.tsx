@@ -61,7 +61,7 @@ export default function LoginPage() {
           <div className="mx-auto bg-primary w-12 h-12 rounded-xl flex items-center justify-center shadow-md">
             <GraduationCap className="text-white h-8 w-8" />
           </div>
-          <CardTitle className="text-2xl font-bold">Corretor SME Pro</CardTitle>
+          <CardTitle className="text-2xl font-bold">AvaLink Poranga</CardTitle>
           <CardDescription>
             Acesse sua conta para gerenciar notas
           </CardDescription>
