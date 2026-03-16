@@ -34,7 +34,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-// Componente para renderizar as legendas do eixo X sem rotação, com fonte menor e quebra de linha
+// Componente para renderizar as legendas do eixo X sem rotação, com fonte pequena e quebra de linha (uma sobre a outra)
 const CustomTick = (props: any) => {
   const { x, y, payload } = props;
   const words = payload.value.split(" ");
@@ -49,7 +49,7 @@ const CustomTick = (props: any) => {
           dy={16}
           textAnchor="middle"
           fill="hsl(var(--muted-foreground))"
-          fontSize={8}
+          fontSize={7} // Fonte menor para melhor ajuste
           fontWeight={600}
           className="uppercase"
         >
@@ -59,6 +59,11 @@ const CustomTick = (props: any) => {
     </g>
   );
 };
+
+interface PerformanceChartProps {
+  students: StudentRecord[];
+  profileData?: any;
+}
 
 export function PerformanceChart({ students, profileData }: PerformanceChartProps) {
   const [currentDate, setCurrentDate] = useState<string>("");
@@ -96,17 +101,18 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
 
   return (
     <div className="space-y-4 print-full-width">
+      {/* Cabeçalho de Impressão */}
       <div className="hidden print:block mb-8 border-b-2 border-primary/20 pb-6 w-full">
         <div className="flex justify-between items-start">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-primary">
               <GraduationCap className="h-6 w-6" />
-              <h1 className="text-2xl font-bold tracking-tight">Corretor SME Pro</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-black">Corretor SME Pro</h1>
             </div>
             <p className="text-muted-foreground text-sm italic">Relatório de Distribuição de Desempenho - {currentDate}</p>
           </div>
           <div className="text-right space-y-1">
-            <h2 className="text-lg font-bold flex items-center justify-end gap-2 text-primary">
+            <h2 className="text-lg font-bold flex items-center justify-end gap-2 text-black">
               <School className="h-4 w-4" /> {profileData?.schoolId || 'Escola não informada'}
             </h2>
             <div className="text-sm text-muted-foreground flex flex-col items-end">
@@ -131,8 +137,9 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
         </Button>
       </div>
 
+      {/* Container do Gráfico Centralizado e Grande no PDF */}
       <div className="print-chart-container w-full flex justify-center items-center">
-        <ChartContainer config={chartConfig} className="h-[400px] w-full print:h-[750px] print:w-[95%]">
+        <ChartContainer config={chartConfig} className="h-[400px] w-full print:h-[800px] print:w-full">
           <BarChart 
             accessibilityLayer 
             data={data} 
@@ -154,7 +161,7 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
               allowDecimals={false}
             />
             <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
-            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={60}>
+            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={70}>
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
@@ -164,13 +171,8 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
       </div>
 
       <div className="hidden print:block mt-8 pt-4 border-t border-slate-100 text-center text-[10px] text-muted-foreground">
-        Gráfico gerado pelo sistema Corretor SME Pro. Total de alunos analisados nesta turma: {students.length}.
+        Gráfico gerado pelo sistema Corretor SME Pro em página única. Total de alunos analisados: {students.length}.
       </div>
     </div>
   )
-}
-
-interface PerformanceChartProps {
-  students: StudentRecord[];
-  profileData?: any;
 }
