@@ -368,7 +368,6 @@ export default function SMEProDashboard() {
           <TabsContent value="students" className="outline-none">
             <StudentList 
               students={currentClassroomStudents} 
-              onClearAll={handleClearAllStudents}
               title="Relatório da Turma Ativa" 
               showPrint={true} 
               profileData={profileData}
