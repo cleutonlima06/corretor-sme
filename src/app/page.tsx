@@ -16,9 +16,10 @@ import { ClassroomHistory } from "@/components/history/ClassroomHistory"
 import { AIInsightsPanel } from "@/components/dashboard/AIInsightsPanel"
 import { ProfessorProfileForm } from "@/components/profile/ProfessorProfileForm"
 import { RankingAba } from "@/components/ranking/RankingAba"
+import { CertificateGenerator } from "@/components/certificates/CertificateGenerator"
 import { StudentRecord } from "@/lib/types"
 import { calculateScore, getPerformanceCategory } from "@/lib/grading"
-import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, Search, Trophy, ShieldCheck, Lock } from "lucide-react"
+import { LayoutDashboard, Settings, UserPlus, FileText, Sparkles, GraduationCap, LogOut, UserCircle, Loader2, Search, Trophy, ShieldCheck, Award } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
@@ -203,20 +204,6 @@ export default function SMEProDashboard() {
     });
   };
 
-  const handleClearAllStudents = () => {
-    if (!user || currentClassroomStudents.length === 0) return;
-    
-    currentClassroomStudents.forEach((student) => {
-      const docRef = doc(db, 'users', user.uid, 'students', student.id);
-      deleteDocumentNonBlocking(docRef);
-    });
-
-    toast({
-      title: "Dados limpos",
-      description: "Todos os registros desta turma foram removidos.",
-    });
-  };
-
   const handleSelectClassroom = (cls: any) => {
     if (!user || !profileRef) return;
     
@@ -312,6 +299,9 @@ export default function SMEProDashboard() {
               <TabsTrigger value="history" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
                 <Search className="h-4 w-4" /> Consultar Turmas
               </TabsTrigger>
+              <TabsTrigger value="certificates" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
+                <Award className="h-4 w-4" /> Certificados
+              </TabsTrigger>
               <TabsTrigger value="settings" className="rounded-lg gap-2 data-[state=active]:bg-primary data-[state=active]:text-white">
                 <Settings className="h-4 w-4" /> Gabarito
               </TabsTrigger>
@@ -382,6 +372,10 @@ export default function SMEProDashboard() {
               onEditStudent={handleOpenEdit}
               onSelectClassroom={handleSelectClassroom} 
             />
+          </TabsContent>
+
+          <TabsContent value="certificates" className="outline-none">
+            <CertificateGenerator />
           </TabsContent>
 
           <TabsContent value="settings" className="outline-none">
