@@ -34,7 +34,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-// Componente para renderizar as legendas do eixo X sem rotação, com fonte pequena e quebra de linha (uma sobre a outra)
+// Componente para renderizar as legendas do eixo X sem rotação, com fonte pequena e quebra de linha
 const CustomTick = (props: any) => {
   const { x, y, payload } = props;
   const words = payload.value.split(" ");
@@ -45,11 +45,11 @@ const CustomTick = (props: any) => {
         <text
           key={index}
           x={0}
-          y={index * 9}
+          y={index * 10}
           dy={16}
           textAnchor="middle"
           fill="hsl(var(--muted-foreground))"
-          fontSize={7} // Fonte menor para melhor ajuste
+          fontSize={7}
           fontWeight={600}
           className="uppercase"
         >
@@ -139,11 +139,11 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
 
       {/* Container do Gráfico Centralizado e Grande no PDF */}
       <div className="print-chart-container w-full flex justify-center items-center">
-        <ChartContainer config={chartConfig} className="h-[400px] w-full print:h-[800px] print:w-full">
+        <ChartContainer config={chartConfig} className="h-[400px] w-full print:h-[750px] print:w-full">
           <BarChart 
             accessibilityLayer 
             data={data} 
-            margin={{ top: 30, right: 30, left: 20, bottom: 60 }}
+            margin={{ top: 30, right: 40, left: 40, bottom: 60 }}
           >
             <CartesianGrid vertical={false} strokeDasharray="3 3" opacity={0.5} />
             <XAxis
@@ -161,7 +161,7 @@ export function PerformanceChart({ students, profileData }: PerformanceChartProp
               allowDecimals={false}
             />
             <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
-            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={70}>
+            <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={50}>
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.fill} />
               ))}
