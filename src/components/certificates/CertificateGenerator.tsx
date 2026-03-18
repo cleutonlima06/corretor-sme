@@ -53,7 +53,7 @@ export function CertificateGenerator() {
     const certData = {
       ...formData,
       verificationCode,
-      schoolName: "Escola ISP",
+      schoolName: "Secretaria de Educação de Poranga",
       professorId: user?.uid,
       createdAt: new Date().toISOString()
     };
