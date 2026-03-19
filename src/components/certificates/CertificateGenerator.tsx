@@ -22,7 +22,7 @@ const getHtml2Pdf = async () => {
 };
 
 export function CertificateGenerator() {
-  const { user } = user ? useUser() : { user: null };
+  const { user } = useUser();
   const db = useFirestore();
   const { toast } = useToast();
   const certificateRef = useRef<HTMLDivElement>(null);
