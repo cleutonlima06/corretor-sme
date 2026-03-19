@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { GraduationCap, Award, FileDown, Loader2, CheckCircle2 } from "lucide-react"
+import { GraduationCap, Award, FileDown, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates"
 import { QRCodeCanvas } from "qrcode.react"
@@ -22,7 +22,7 @@ const getHtml2Pdf = async () => {
 };
 
 export function CertificateGenerator() {
-  const { user } = useUser();
+  const { user } = user ? useUser() : { user: null };
   const db = useFirestore();
   const { toast } = useToast();
   const certificateRef = useRef<HTMLDivElement>(null);
@@ -223,7 +223,7 @@ export function CertificateGenerator() {
                   <div className="pt-16 grid grid-cols-3 gap-8 items-end px-12">
                     <div className="text-left space-y-2">
                       <div className="h-px bg-slate-400 w-full mb-2" />
-                      <p className="text-lg font-bold text-slate-800">Secretaria de Educação de Poranga</p>
+                      <p className="text-lg font-bold text-slate-800 whitespace-nowrap">Secretaria de Educação de Poranga</p>
                       <p className="text-xs text-primary font-bold uppercase tracking-widest">{generatedData.institution}</p>
                     </div>
 
