@@ -55,7 +55,7 @@ export function CertificateGenerator() {
       ...formData,
       verificationCode,
       institution: "Maria Pereira da Silva",
-      department: "Secretaria de Educação de Poranga",
+      department: "Secretária de Educação de Poranga",
       professorId: user?.uid,
       createdAt: new Date().toISOString()
     };
@@ -221,9 +221,9 @@ export function CertificateGenerator() {
 
                   {/* RODAPÉ E QR CODE */}
                   <div className="pt-16 grid grid-cols-3 gap-8 items-end px-12">
-                    <div className="text-left space-y-2">
+                    <div className="text-center space-y-2">
                       <div className="h-px bg-slate-400 w-full mb-2" />
-                      <p className="text-lg font-bold text-slate-800 whitespace-nowrap">Secretaria de Educação de Poranga</p>
+                      <p className="text-lg font-bold text-slate-800 whitespace-nowrap">Secretária de Educação de Poranga</p>
                       <p className="text-xs text-primary font-bold uppercase tracking-widest">{generatedData.institution}</p>
                     </div>
 
