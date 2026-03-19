@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import { useUser, useFirestore } from "@/firebase"
-import { collection, addDoc } from "firebase/firestore"
+import { collection } from "firebase/firestore"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { GraduationCap, Award, FileDown, Loader2, CheckCircle2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { addDocumentNonBlocking } from "@/firebase/non-blocking-updates"
+import { QRCodeCanvas } from "qrcode.react"
 
 // Importação dinâmica do html2pdf apenas no lado do cliente
 const getHtml2Pdf = async () => {
@@ -53,7 +54,8 @@ export function CertificateGenerator() {
     const certData = {
       ...formData,
       verificationCode,
-      schoolName: "Secretaria de Educação de Poranga",
+      institution: "Maria Pereira da Silva",
+      department: "Secretaria de Educação de Poranga",
       professorId: user?.uid,
       createdAt: new Date().toISOString()
     };
@@ -68,7 +70,7 @@ export function CertificateGenerator() {
 
     toast({
       title: "Certificado Gerado",
-      description: "O modelo foi preenchido e salvo com sucesso."
+      description: "O modelo institucional foi preenchido com sucesso."
     });
   };
 
@@ -82,10 +84,10 @@ export function CertificateGenerator() {
 
       const element = certificateRef.current;
       const opt = {
-        margin: 10,
+        margin: 0,
         filename: `certificado_${formData.studentName.replace(/\s+/g, '_')}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
+        image: { type: 'jpeg', quality: 1.0 },
+        html2canvas: { scale: 3, useCORS: true, logging: false },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
       };
 
@@ -93,7 +95,7 @@ export function CertificateGenerator() {
       
       toast({
         title: "Download Concluído",
-        description: "O arquivo PDF foi gerado e baixado."
+        description: "O arquivo PDF foi gerado em alta definição."
       });
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
@@ -108,16 +110,16 @@ export function CertificateGenerator() {
   };
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="space-y-8 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Formulário */}
-        <Card className="lg:col-span-1 shadow-md border-primary/10">
+        <Card className="lg:col-span-1 shadow-md border-primary/10 no-print">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <GraduationCap className="h-5 w-5 text-primary" />
               Dados do Certificado
             </CardTitle>
-            <CardDescription>Preencha os dados para gerar o documento.</CardDescription>
+            <CardDescription>Emissão institucional de Poranga.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -130,19 +132,19 @@ export function CertificateGenerator() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="activity">Nome da Atividade</Label>
+              <Label htmlFor="activity">Atividade/Evento</Label>
               <Input
                 id="activity"
-                placeholder="Ex: Avaliação Bimestral de Matemática"
+                placeholder="Ex: Olimpíada de Matemática"
                 value={formData.activityName}
                 onChange={(e) => setFormData({ ...formData, activityName: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="date">Data</Label>
+              <Label htmlFor="date">Data de Emissão</Label>
               <Input
                 id="date"
-                placeholder="Ex: 25 de Outubro de 2024"
+                placeholder="Ex: 18 de Março de 2026"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
               />
@@ -160,7 +162,7 @@ export function CertificateGenerator() {
                   className="w-full gap-2 border-primary/20 text-primary hover:bg-primary/5"
                 >
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
-                  Baixar PDF
+                  Baixar PDF (A4)
                 </Button>
               )}
             </div>
@@ -168,61 +170,84 @@ export function CertificateGenerator() {
         </Card>
 
         {/* Preview do Certificado */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3 overflow-auto flex justify-center bg-slate-100 p-8 rounded-xl border-2 border-dashed">
           {!generatedData ? (
-            <Card className="h-full flex flex-col items-center justify-center border-dashed border-2 bg-slate-50 text-muted-foreground p-12 text-center">
+            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
               <Award className="h-16 w-16 mb-4 opacity-20" />
-              <h3 className="text-lg font-bold">Pré-visualização do Certificado</h3>
-              <p className="text-sm max-w-xs mt-2">Preencha o formulário ao lado e clique em "Gerar Certificado" para ver o resultado aqui.</p>
-            </Card>
+              <h3 className="text-lg font-bold">Pré-visualização</h3>
+              <p className="text-sm max-w-xs mt-2">Os certificados são gerados em formato A4 Paisagem com design oficial.</p>
+            </div>
           ) : (
-            <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-              <div className="bg-white p-2 rounded-xl shadow-2xl border-4 border-primary/20 overflow-hidden relative">
-                {/* O elemento que será convertido em PDF */}
+            <div 
+              className="bg-white shadow-2xl origin-top"
+              style={{ width: '297mm', height: '210mm' }}
+            >
+              <div 
+                id="certificado"
+                ref={certificateRef}
+                className="relative bg-white overflow-hidden flex flex-col items-center justify-center p-0"
+                style={{ width: '303mm', height: '216mm', marginLeft: '-3mm', marginTop: '-3mm' }}
+              >
+                {/* FUNDO E BORDAS FULL BLEED */}
                 <div 
-                  ref={certificateRef}
-                  className="bg-white border-[12px] border-primary p-12 text-center space-y-8 min-h-[500px] flex flex-col justify-center relative"
-                  style={{ backgroundImage: 'radial-gradient(circle at center, #f0fdf4 0%, #ffffff 100%)' }}
-                >
-                  {/* Selo decorativo */}
-                  <div className="absolute top-8 right-8 text-primary/10">
-                    <Award size={120} />
-                  </div>
+                  className="absolute inset-0 border-[15mm] border-primary" 
+                  style={{ backgroundImage: 'radial-gradient(circle at center, #fdfdfd 0%, #f8fafc 100%)' }}
+                />
+                
+                {/* DETALHES DOURADOS */}
+                <div className="absolute inset-[18mm] border border-yellow-500/30 pointer-events-none" />
 
+                {/* SELO SUPERIOR */}
+                <div className="absolute top-[25mm] right-[25mm] opacity-10">
+                  <Award size={150} className="text-primary" />
+                </div>
+
+                {/* CONTEÚDO PRINCIPAL */}
+                <div className="relative z-10 text-center space-y-10 w-[240mm]">
                   <div className="space-y-2">
-                    <h1 className="text-5xl font-black tracking-[0.2em] text-primary">CERTIFICADO</h1>
-                    <div className="h-1 w-32 bg-primary/30 mx-auto rounded-full" />
+                    <h1 className="text-7xl font-black tracking-[0.3em] text-primary">CERTIFICADO</h1>
+                    <div className="h-1 w-48 bg-yellow-500/50 mx-auto rounded-full" />
                   </div>
 
-                  <div className="space-y-6">
-                    <p className="text-lg text-slate-600 uppercase tracking-widest font-medium">Certificamos que</p>
-                    <h2 className="text-4xl font-bold text-slate-800 underline decoration-primary decoration-4 underline-offset-8">
+                  <div className="space-y-8">
+                    <p className="text-xl text-slate-500 uppercase tracking-[0.4em] font-medium">Certificamos que</p>
+                    <h2 className="text-6xl font-bold text-slate-800 underline decoration-yellow-500/40 decoration-4 underline-offset-8 font-serif italic">
                       {generatedData.studentName}
                     </h2>
-                    <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-2xl text-slate-600 max-w-4xl mx-auto leading-relaxed">
                       Concluiu com êxito a atividade <span className="font-bold text-primary">"{generatedData.activityName}"</span> realizada em <span className="font-bold">{generatedData.date}</span>, demonstrando excelente desempenho e dedicação acadêmica.
                     </p>
                   </div>
 
-                  <div className="pt-12 grid grid-cols-2 gap-12 items-end">
-                    <div className="space-y-1">
+                  {/* RODAPÉ E QR CODE */}
+                  <div className="pt-16 grid grid-cols-3 gap-8 items-end px-12">
+                    <div className="text-left space-y-2">
                       <div className="h-px bg-slate-400 w-full mb-2" />
-                      <p className="text-sm font-bold text-slate-800">{generatedData.schoolName}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase">Instituição de Ensino</p>
+                      <p className="text-lg font-bold text-slate-800">Secretaria de Educação de Poranga</p>
+                      <p className="text-xs text-primary font-bold uppercase tracking-widest">{generatedData.institution}</p>
                     </div>
-                    <div className="text-right space-y-1">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Código de Autenticidade</p>
-                      <p className="text-xs font-mono font-bold text-primary bg-primary/5 inline-block px-2 py-1 rounded">
+
+                    <div className="flex flex-col items-center justify-center">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Autenticação</p>
+                      <p className="text-xs font-mono font-bold text-primary bg-primary/5 px-3 py-1 rounded border border-primary/20">
                         #{generatedData.verificationCode}
                       </p>
+                    </div>
+
+                    <div className="flex flex-col items-end">
+                      <div className="p-2 bg-white border-2 border-slate-100 rounded-lg shadow-sm">
+                        <QRCodeCanvas 
+                          value={`https://avalink-poranga.edu/verify/${generatedData.verificationCode}`} 
+                          size={80}
+                          level="H"
+                          includeMargin={false}
+                        />
+                      </div>
+                      <p className="text-[8px] text-muted-foreground mt-1 uppercase font-bold tracking-tighter">Validação via QR Code</p>
                     </div>
                   </div>
                 </div>
               </div>
-              <p className="text-center text-xs text-muted-foreground mt-4 flex items-center justify-center gap-2">
-                <CheckCircle2 className="h-3 w-3 text-green-500" /> 
-                Este é um documento digital verificado pelo sistema AvaLink Poranga.
-              </p>
             </div>
           )}
         </div>
