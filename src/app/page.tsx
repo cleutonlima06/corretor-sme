@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -315,17 +316,24 @@ export default function SMEProDashboard() {
             <div className="no-print">
               <SummaryCards students={currentClassroomStudents} />
             </div>
+            
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8 no-print">
-                <AIInsightsPanel answerKey={answerKey} students={currentClassroomStudents} />
-                <StudentList 
-                  students={recentStudents} 
-                  title="Últimos lançamentos" 
-                  showPrint={false} 
-                  answerKey={answerKey}
-                />
-              </div>
-              <div className="space-y-8">
+              {/* Coluna Principal: Insights, Lançamentos e Gráfico */}
+              <div className="lg:col-span-2 space-y-8">
+                <div className="no-print">
+                  <AIInsightsPanel answerKey={answerKey} students={currentClassroomStudents} />
+                </div>
+                
+                <div className="no-print">
+                  <StudentList 
+                    students={recentStudents} 
+                    title="Últimos lançamentos" 
+                    showPrint={false} 
+                    answerKey={answerKey}
+                  />
+                </div>
+
+                {/* Gráfico agora abaixo da lista de alunos e com largura maior */}
                 <div className="bg-white p-6 rounded-xl border shadow-sm print-full-width">
                   <div className="flex items-center justify-between mb-4 no-print">
                     <h3 className="font-bold flex items-center gap-2">
@@ -335,6 +343,11 @@ export default function SMEProDashboard() {
                   </div>
                   <PerformanceChart students={currentClassroomStudents} profileData={profileData} />
                 </div>
+              </div>
+
+              {/* Coluna Lateral Opcional */}
+              <div className="space-y-8 hidden lg:block">
+                {/* Futuros widgets ou informações rápidas podem ser inseridos aqui */}
               </div>
             </div>
           </TabsContent>
