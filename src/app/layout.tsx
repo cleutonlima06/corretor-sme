@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   icons: {
     icon: [
+      { url: '/logo.png', type: 'image/png' },
       { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' }
     ],
@@ -39,6 +40,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <head>
+        <link rel="icon" href="/logo.png" type="image/png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
